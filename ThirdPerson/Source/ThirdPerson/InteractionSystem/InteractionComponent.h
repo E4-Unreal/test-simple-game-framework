@@ -16,16 +16,16 @@ class THIRDPERSON_API UInteractionComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UInteractionComponent();
-
-	// ¸â¹ö º¯¼ö
-	UPROPERTY(BlueprintReadOnly)
-	UCameraComponent* PlayerCamera;
 	
 	// ¸â¹ö ÇÔ¼ö
 	void Init(UCameraComponent* Camera);
 	void BindCamera(UCameraComponent* Camera);
 	AActor* DetectActor();
 	void Interact();
+
+private:
+	// ¸â¹ö º¯¼ö
+	UCameraComponent* PlayerCamera;
 
 protected:
 	// Called when the game starts

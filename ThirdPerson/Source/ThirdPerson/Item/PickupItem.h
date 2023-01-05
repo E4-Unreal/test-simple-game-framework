@@ -29,7 +29,7 @@ public:
 	int32 ItemCount;
 
 	// 멤버 함수
-private:
+protected:
 	// 초기화
 	void Init();
 	void SetMesh();
@@ -41,7 +41,7 @@ private:
 	void Update(bool bSucceed, int32 Count);
 
 	// IInteractable
-	void virtual Interact_Implementation(AActor* Interactor) override;
+	virtual void Interact_Implementation(AActor* Interactor) override;
 
 protected:
 	// Called when the game starts or when spawned

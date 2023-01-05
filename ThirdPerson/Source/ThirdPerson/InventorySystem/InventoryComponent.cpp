@@ -3,6 +3,7 @@
 
 #include "InventoryComponent.h"
 
+#include "ThirdPerson/ThirdPerson.h"
 #include "ThirdPerson/Item/ItemDefinition.h"
 
 // Sets default values for this component's properties
@@ -18,9 +19,11 @@ UInventoryComponent::UInventoryComponent()
 void UInventoryComponent::AddItem(class UItemDefinition* ItemDefinition, const int32 ItemCount, bool& bSucceed, int32& Remainder)
 {
 	// 구현 예정
-	UE_LOG(LogTemp, Log, TEXT("UInventoryComponent::AddItem %s %d"), *ItemDefinition->GetName(), ItemCount);
+	UE_LOG(LogInventory, Log, TEXT("AddItem"));
+	UE_LOG(LogInventory, Log, TEXT("ItemDefinition: %s / Count: %d"), *ItemDefinition->GetName(), ItemCount);
 	bSucceed = true;
 	Remainder = 0;
+	UE_LOG(LogInventory, Log, TEXT("bSucceed: %s / Remainder: %d"), bSucceed ? TEXT("true") : TEXT("false"), Remainder);
 }
 
 
