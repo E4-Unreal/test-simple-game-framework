@@ -30,8 +30,13 @@ protected:
 	{
 		MaxInventorySlots = InventorySlots;
 	}
-	bool FindNewIndex(int32& Index);
+	int32 GetEmptyIndex();
 	bool FillSameItem(class UItemDefinition* ItemDefinition, int32 &ItemCount);
+	
+	FORCEINLINE bool IsAddable() const
+	{
+		return Inventory.Num() < MaxInventorySlots;
+	}
 	
 	// Called when the game starts
 	virtual void BeginPlay() override;

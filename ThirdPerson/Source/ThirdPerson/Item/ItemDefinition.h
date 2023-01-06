@@ -68,9 +68,9 @@ public:
 		this->ItemDefinition = ItemDefinition;
 	};
 
-	FORCEINLINE bool Addable() const
+	FORCEINLINE bool IsAddable() const
 	{
-		return ItemDefinition->MaxStack == Count;
+		return ItemDefinition->MaxStack > Count;
 	}
 	
 	bool Add(int32& NewCount);

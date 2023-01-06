@@ -41,31 +41,44 @@ bool UInventoryComponent::AddItem(UItemDefinition* ItemDefinition, int32& ItemCo
 		return false;
 	}
 
-	const bool bAdded = FillSameItem(ItemDefinition, ItemCount);
+	// 동일한 아이템 존재시 채워넣기
+	bool bAdded = FillSameItem(ItemDefinition, ItemCount);
 
-	// 새로운 아이템 혹은 기존 아이템 용량을 초과한 아이템 추가
-	int32 Index;
-	if(FindNewIndex(Index))
+	// 새로운 아이템 혹은 용량을 초과한 아이템 추가
+	while(ItemCount > 0 && IsAddable())
 	{
-		FInventoryItem NewInventoryItem(Index, 0, ItemDefinition);
+		bAdded = true;
+		int32 Count;
+		if(ItemCount >= ItemDefinition->MaxStack)
+		{
+			Count = ItemDefinition->MaxStack;
+			ItemCount -= Count;
+		}
+		else
+		{
+			Count = ItemCount;
+			ItemCount = 0;
+		}
+
+		int32 NewIndex = GetEmptyIndex();
+		FInventoryItem NewInventoryItem(NewIndex, Count, ItemDefinition);
 		Inventory.Add(NewInventoryItem);
-		return AddItem(ItemDefinition, ItemCount);
+		UE_LOG(LogInventory, Log, TEXT("Item Added To New Inventory Slot\nIndex: %d / Count: %d"), NewIndex, Count);
+	}
+	
+	if(bAdded)
+	{
+		UE_LOG(LogInventory, Log, TEXT("Add Item To Inventory Complete\nItemCount Reaminder: %d"), ItemCount);
 	}
 	else
 	{
-		UE_LOG(LogInventory, Log, TEXT("bAdded: %s"), bAdded ? TEXT("true") : TEXT("false"));
-		return bAdded;
+		UE_LOG(LogInventory, Log, TEXT("Inventory Is Full"));
 	}
+	return bAdded;
 }
 
-bool UInventoryComponent::FindNewIndex(int32& Index)
+int32 UInventoryComponent::GetEmptyIndex()
 {
-	// 인벤토리 슬롯 꽉 참 
-	if(Inventory.Num() == MaxInventorySlots)
-	{
-		return false;
-	}
-
 	// 아이템이 들어있는 인벤토리 슬롯 인덱스 검색
 	TArray<int32> Indices;
 	for(FInventoryItem InventoryItem : Inventory)
@@ -73,18 +86,16 @@ bool UInventoryComponent::FindNewIndex(int32& Index)
 		Indices.Add(InventoryItem.InventoryIndex);
 	}
 
-	// 비어 있는 인덱스 중 가장 작은 인덱스 반환
+	// 비어 있는 인덱스 중 가장 작은 인덱스 반환s
 	for(int i = 0; i < MaxInventorySlots; i++)
 	{
 		if(Indices.Find(i) == INDEX_NONE)
 		{
-			Index = i;
-			return true;
+			return i;
 		}
 	}
-
-	//UE_LOG(LogInventory, Error, TEXT("InventoryComponent::FindNewIndex\n인벤토리 슬롯 유효성 검사 실패"));
-	return false;
+	UE_LOG(LogInventory, Error, TEXT("InventoryComponent::GetEmptyIndex\nNo Empty Index. Use IsAddable() first."));
+	return -1;
 }
 
 bool UInventoryComponent::FillSameItem(UItemDefinition* ItemDefinition, int32& ItemCount)
@@ -93,7 +104,7 @@ bool UInventoryComponent::FillSameItem(UItemDefinition* ItemDefinition, int32& I
 	TArray<int32> Indices;
 	for(FInventoryItem InventoryItem : Inventory)
 	{
-		if(InventoryItem == ItemDefinition && InventoryItem.Addable())
+		if(InventoryItem == ItemDefinition && InventoryItem.IsAddable())
 		{
 			Indices.Add(InventoryItem.InventoryIndex);
 		}
