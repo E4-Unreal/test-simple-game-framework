@@ -4,6 +4,7 @@
 #include "InteractionComponent.h"
 #include "Interactable.h"
 #include "Camera/CameraComponent.h"
+#include "ThirdPerson/ThirdPerson.h"
 
 // Sets default values for this component's properties
 UInteractionComponent::UInteractionComponent()
@@ -27,6 +28,12 @@ void UInteractionComponent::BindCamera(UCameraComponent* Camera)
 
 AActor* UInteractionComponent::DetectActor()
 {
+	if(!PlayerCamera)
+	{
+		UE_LOG(LogInteraction, Error, TEXT("InteractionComponent::DetectActor\nPlayerCamera is nullptr"));
+		return nullptr;
+	}
+	
 	FHitResult HitResult;
 
 	FCollisionQueryParams Params;

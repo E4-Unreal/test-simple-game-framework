@@ -6,3 +6,4 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogSimpleFramework, Log, All);
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogInteraction, Log, All);
