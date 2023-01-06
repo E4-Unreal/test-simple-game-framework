@@ -62,26 +62,23 @@ void APickupItem::AddItemToInventory(AActor* InventoryOwner)
 	UInventoryComponent* Inventory = InventoryOwner->FindComponentByClass<UInventoryComponent>();
 	if(Inventory)
 	{
-		bool bSucceed;
-		int32 Remainder;
-			
-		Inventory->AddItem(ItemDefinition, ItemCount, bSucceed, Remainder);
-		Update(bSucceed, Remainder);
+		if(Inventory->AddItem(ItemDefinition, ItemCount))
+		{
+			Update();
+		}
 	}
 }
 
-void APickupItem::Update(const bool bSucceed, const int32 Remainder)
+void APickupItem::Update()
 {
-	if(bSucceed)
+	if(ItemCount == 0)
 	{
-		if(Remainder > 0)
-		{
-			ItemCount = Remainder;
-		}
-		else
-		{
-			this->Destroy();
-		}
+		this->Destroy();
+	}
+	else if(ItemCount < 0)
+	{
+		UE_LOG(LogInventory, Error, TEXT("PickupItem :: ItemCount < 0"));
+		this->Destroy();
 	}
 }
 

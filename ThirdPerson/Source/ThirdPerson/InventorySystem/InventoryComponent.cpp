@@ -16,14 +16,16 @@ UInventoryComponent::UInventoryComponent()
 	// ...
 }
 
-void UInventoryComponent::AddItem(class UItemDefinition* ItemDefinition, const int32 ItemCount, bool& bSucceed, int32& Remainder)
+bool UInventoryComponent::AddItem(class UItemDefinition* ItemDefinition, int32& ItemCount)
 {
 	// 구현 예정
 	UE_LOG(LogInventory, Log, TEXT("AddItem"));
 	UE_LOG(LogInventory, Log, TEXT("ItemDefinition: %s / Count: %d"), *ItemDefinition->GetName(), ItemCount);
-	bSucceed = true;
-	Remainder = 0;
-	UE_LOG(LogInventory, Log, TEXT("bSucceed: %s / Remainder: %d"), bSucceed ? TEXT("true") : TEXT("false"), Remainder);
+	UE_LOG(LogInventory, Log, TEXT("ItemCount -= 30"));
+	ItemCount -= 30;
+
+	UE_LOG(LogInventory, Log, TEXT("ItemCount: %d"), ItemCount);
+	return true;
 }
 
 

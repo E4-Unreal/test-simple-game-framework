@@ -18,7 +18,7 @@ public:
 
 	// ¸â¹ö ÇÔ¼ö
 public:
-	void AddItem(class UItemDefinition* ItemDefinition, int32 ItemCount, bool& bSucceed, int32& Remainder);
+	bool AddItem(class UItemDefinition* ItemDefinition, int32 &ItemCount);
 
 protected:
 	// Called when the game starts

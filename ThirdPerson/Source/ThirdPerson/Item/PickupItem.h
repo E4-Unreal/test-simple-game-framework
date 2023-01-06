@@ -38,7 +38,7 @@ protected:
 
 	// 상호작용
 	void AddItemToInventory(AActor* InventoryOwner);
-	void Update(bool bSucceed, int32 Count);
+	void Update();
 
 	// IInteractable
 	virtual void Interact_Implementation(AActor* Interactor) override;
