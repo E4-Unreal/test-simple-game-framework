@@ -7,9 +7,13 @@
 ASimpleFrameworkCharacter::ASimpleFrameworkCharacter()
 {
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
-	InteractionComponent->Init(FollowCamera);
-
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+}
+
+void ASimpleFrameworkCharacter::Init()
+{
+	InteractionComponent->Init(FollowCamera);
+	InventoryComponent->Init(InventorySlots);
 }
 
 void ASimpleFrameworkCharacter::Interact()
@@ -26,4 +30,10 @@ void ASimpleFrameworkCharacter::SetupPlayerInputComponent(UInputComponent* Playe
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ASimpleFrameworkCharacter::Interact);
 
 	}
+}
+
+void ASimpleFrameworkCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	Init();
 }

@@ -15,6 +15,10 @@ UCLASS()
 class THIRDPERSON_API ASimpleFrameworkCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
+
+public:
+	ASimpleFrameworkCharacter();
+
 	UInteractionComponent* InteractionComponent;
 	UInventoryComponent* InventoryComponent;
 	
@@ -22,12 +26,14 @@ class THIRDPERSON_API ASimpleFrameworkCharacter : public ABaseCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* InteractAction;
 
-public:
-	ASimpleFrameworkCharacter();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryComponent")
+	int32 InventorySlots = 0;
 
 protected:
+	void Init();
 	/** Called for movement input */
 	void Interact();
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent);
+	virtual void BeginPlay() override;
 };
