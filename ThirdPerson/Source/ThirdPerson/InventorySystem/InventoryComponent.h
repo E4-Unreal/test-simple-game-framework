@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ThirdPerson/Item/ItemDefinition.h"
 #include "InventoryComponent.generated.h"
-
 
 UCLASS( Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class THIRDPERSON_API UInventoryComponent : public UActorComponent
@@ -15,12 +15,24 @@ class THIRDPERSON_API UInventoryComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UInventoryComponent();
-
+	
 	// ¸â¹ö ÇÔ¼ö
-public:
+	void Init(int32 MaxInventorySlots);
 	bool AddItem(class UItemDefinition* ItemDefinition, int32 &ItemCount);
 
 protected:
+	// ¸â¹ö º¯¼ö
+	int32 MaxInventorySlots;
+	TArray<FInventoryItem> Inventory;
+
+	// ¸â¹ö ÇÔ¼ö
+	FORCEINLINE void SetInventorySlots(int32 InventorySlots)
+	{
+		MaxInventorySlots = InventorySlots;
+	}
+	bool FindNewIndex(int32& Index);
+	bool FillSameItem(class UItemDefinition* ItemDefinition, int32 &ItemCount);
+	
 	// Called when the game starts
 	virtual void BeginPlay() override;
 

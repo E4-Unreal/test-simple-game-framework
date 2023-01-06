@@ -7,6 +7,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "ThirdPerson/InventorySystem/InventoryComponent.h"
+#include "ThirdPerson/ThirdPerson.h"
 
 // Sets default values
 APickupItem::APickupItem()
