@@ -15,21 +15,20 @@ UInventoryComponent::UInventoryComponent()
 	// ...
 }
 
-void UInventoryComponent::Init(int32 InventorySlotNum)
+void UInventoryComponent::Init(int32 InventorySlots)
 {
-	if(InventorySlotNum < 0)
+	if(InventorySlots < 0)
 	{
 		UE_LOG(LogInventory, Error, TEXT("InventoryComponent::Init\nInventorySlotNum < 0"));
 		SetInventorySlots(0);
 	}
 	else
 	{
-		UE_LOG(LogInventory, Log, TEXT("InventoryComponent::Init\nInventorySlotNum: %d"), InventorySlotNum);
-		SetInventorySlots(InventorySlotNum);
+		UE_LOG(LogInventory, Log, TEXT("InventoryComponent::Init\nInventorySlotNum: %d"), InventorySlots);
+		SetInventorySlots(InventorySlots);
 	}
 }
 
-// 리팩토링 필요
 bool UInventoryComponent::AddItem(UItemDefinition* ItemDefinition, int32& ItemCount)
 {
 	UE_LOG(LogInventory, Log, TEXT("InventoryComponent::AddItem\nItemDefinition: %s / Count: %d"), *ItemDefinition->GetName(), ItemCount);

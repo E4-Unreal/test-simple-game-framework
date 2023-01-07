@@ -17,8 +17,8 @@ public:
 	UInventoryComponent();
 	
 	// ¸â¹ö ÇÔ¼ö
-	void Init(int32 MaxInventorySlots);
-	bool AddItem(class UItemDefinition* ItemDefinition, int32 &ItemCount);
+	void Init(int32 InventorySlots);
+	bool AddItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
 
 protected:
 	// ¸â¹ö º¯¼ö
@@ -31,7 +31,7 @@ protected:
 		MaxInventorySlots = InventorySlots;
 	}
 	int32 GetEmptyIndex();
-	bool FillSameItem(class UItemDefinition* ItemDefinition, int32 &ItemCount);
+	bool FillSameItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
 	
 	FORCEINLINE bool IsAddable() const
 	{

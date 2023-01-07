@@ -34,6 +34,6 @@ protected:
 	/** Called for movement input */
 	void Interact();
 	
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent);
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 };
