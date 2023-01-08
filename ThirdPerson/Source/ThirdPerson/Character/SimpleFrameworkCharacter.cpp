@@ -2,6 +2,8 @@
 
 
 #include "ThirdPerson/Character/SimpleFrameworkCharacter.h"
+
+#include "CharacterInfo.h"
 #include "EnhancedInputComponent.h"
 
 ASimpleFrameworkCharacter::ASimpleFrameworkCharacter()
@@ -12,8 +14,20 @@ ASimpleFrameworkCharacter::ASimpleFrameworkCharacter()
 
 void ASimpleFrameworkCharacter::Init()
 {
-	InteractionComponent->Init(FollowCamera);
+	InteractionComponent->Init(GetFollowCamera());
 	InventoryComponent->Init(InventorySlots);
+	ApplyCharacterInfo();
+}
+
+void ASimpleFrameworkCharacter::ApplyCharacterInfo()
+{
+	if(CharacterInfo)
+	{
+		GetMesh()->SetSkeletalMesh(CharacterInfo->SkeletalMeshAsset);
+		GetMesh()->SetRelativeLocation(CharacterInfo->Location);
+		GetMesh()->SetRelativeRotation(CharacterInfo->Rotator);
+		GetMesh()->SetAnimInstanceClass(CharacterInfo->AnimClass);
+	}
 }
 
 void ASimpleFrameworkCharacter::Interact()

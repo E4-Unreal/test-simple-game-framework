@@ -11,6 +11,8 @@
 /**
  * 
  */
+class UCharacterInfo;
+
 UCLASS()
 class THIRDPERSON_API ASimpleFrameworkCharacter : public ABaseCharacter
 {
@@ -18,6 +20,9 @@ class THIRDPERSON_API ASimpleFrameworkCharacter : public ABaseCharacter
 
 public:
 	ASimpleFrameworkCharacter();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCharacterInfo* CharacterInfo;
 
 	UInteractionComponent* InteractionComponent;
 	UInventoryComponent* InventoryComponent;
@@ -31,6 +36,7 @@ public:
 
 protected:
 	void Init();
+	void ApplyCharacterInfo();
 	/** Called for movement input */
 	void Interact();
 	

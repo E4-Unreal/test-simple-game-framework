@@ -19,24 +19,23 @@ public:
 	// ¸â¹ö ÇÔ¼ö
 	void Init(int32 InventorySlots);
 	bool AddItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
+	
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE int32 GetMaxInventorySlots() const { return MaxInventorySlots; }
 
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE TArray<FInventoryItem> GetInventory() const { return Inventory; }
+	
 protected:
 	// ¸â¹ö º¯¼ö
 	int32 MaxInventorySlots;
 	TArray<FInventoryItem> Inventory;
 
 	// ¸â¹ö ÇÔ¼ö
-	FORCEINLINE void SetInventorySlots(int32 InventorySlots)
-	{
-		MaxInventorySlots = InventorySlots;
-	}
+	FORCEINLINE void SetInventorySlots(int32 InventorySlots) { MaxInventorySlots = InventorySlots; }
 	int32 GetEmptyIndex();
 	bool FillSameItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
-	
-	FORCEINLINE bool IsAddable() const
-	{
-		return Inventory.Num() < MaxInventorySlots;
-	}
+	FORCEINLINE bool IsAddable() const { return Inventory.Num() < MaxInventorySlots; }
 	
 	// Called when the game starts
 	virtual void BeginPlay() override;

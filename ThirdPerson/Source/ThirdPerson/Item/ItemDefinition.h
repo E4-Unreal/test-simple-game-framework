@@ -49,14 +49,19 @@ public:
 	
 };
 
-USTRUCT(BlueprintType, Meta = (DisplayName = "Inventory Item", ShortTooltip = "Struct used for InventoryComponent"))
+USTRUCT(Atomic, BlueprintType, Meta = (DisplayName = "Inventory Item", ShortTooltip = "Struct used for InventoryComponent"))
 struct FInventoryItem
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(BlueprintReadOnly)
 	int32 InventoryIndex;
+	
+	UPROPERTY(BlueprintReadOnly)
 	int32 Count;
+	
+	UPROPERTY(BlueprintReadOnly)
 	UItemDefinition* ItemDefinition;
 
 	FInventoryItem() {};
