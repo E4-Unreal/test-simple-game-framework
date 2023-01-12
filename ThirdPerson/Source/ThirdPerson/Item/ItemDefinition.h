@@ -38,6 +38,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName Name;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (MultiLine = true))
+	FText Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UTexture2D* Thumbnail;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 SpawnCount;
 	
