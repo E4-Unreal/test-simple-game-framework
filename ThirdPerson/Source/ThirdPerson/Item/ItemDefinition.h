@@ -61,6 +61,7 @@ struct FInventoryItem
 	GENERATED_USTRUCT_BODY()
 
 public:
+	// ¸â¹ö º¯¼ö
 	UPROPERTY(BlueprintReadOnly)
 	int32 InventoryIndex;
 	
@@ -70,6 +71,7 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UItemDefinition* ItemDefinition;
 
+	// ¸â¹ö ÇÔ¼ö
 	FInventoryItem() {};
 
 	FInventoryItem(int32 InventoryIndex, int32 Count, UItemDefinition* ItemDefinition)
@@ -79,19 +81,13 @@ public:
 		this->ItemDefinition = ItemDefinition;
 	};
 
-	FORCEINLINE bool IsAddable() const
-	{
-		return ItemDefinition->MaxStack > Count;
-	}
-	
 	bool Add(int32& NewCount);
 
-	FORCEINLINE bool operator==(UItemDefinition* Other) const
-	{
-		return this->ItemDefinition == Other;
-	}
-	FORCEINLINE bool operator!=(UItemDefinition* Other) const
-	{
-		return this->ItemDefinition == Other;
-	}
+	FORCEINLINE bool IsAddable() const { return ItemDefinition->MaxStack > Count; }
+	
+	FORCEINLINE bool operator==(UItemDefinition* Other) const { return this->ItemDefinition == Other; }
+	FORCEINLINE bool operator!=(UItemDefinition* Other) const { return this->ItemDefinition == Other; }
+	
+	FORCEINLINE bool operator==(int32 Index) const { return this->InventoryIndex == Index; }
+	FORCEINLINE bool operator!=(int32 Index) const { return this->InventoryIndex == Index; }
 };

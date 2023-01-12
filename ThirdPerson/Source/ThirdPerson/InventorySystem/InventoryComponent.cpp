@@ -68,12 +68,39 @@ bool UInventoryComponent::AddItem(UItemDefinition* ItemDefinition, int32& ItemCo
 	if(bAdded)
 	{
 		UE_LOG(LogInventory, Log, TEXT("Add Item To Inventory Complete\nItemCount Reaminder: %d"), ItemCount);
+		// 이벤트 디스패처 호출
+		OnUpdate.Broadcast();
 	}
 	else
 	{
 		UE_LOG(LogInventory, Log, TEXT("Inventory Is Full"));
 	}
 	return bAdded;
+}
+
+bool UInventoryComponent::SwapItems(int32 SourceIndex, int32 DestinationIndex)
+{
+	bool bSucceed = false;
+	// Index 유효성 검사
+	if(SourceIndex < 0 || SourceIndex >= MaxInventorySlots) { return bSucceed; }
+	if(DestinationIndex < 0 || DestinationIndex >= MaxInventorySlots) { return bSucceed; }
+
+	// InventoryItem->InventoryIndex Swap
+	FInventoryItem* SourceItem = GetInventoryItemByIndex(SourceIndex);
+	FInventoryItem* DestinationItem = GetInventoryItemByIndex(DestinationIndex);
+
+	if(SourceItem)
+	{
+		SourceItem->InventoryIndex = DestinationIndex;
+		if(DestinationItem) { DestinationItem->InventoryIndex = SourceIndex; }
+		bSucceed = true;
+	}
+
+	UE_LOG(LogInventory, Log, TEXT("InventoryComponent::SwapItems\n%d to %d"), SourceIndex, DestinationIndex);
+	
+	// 이벤트 디스패처 호출
+	//OnUpdate.Broadcast();
+	return bSucceed;
 }
 
 int32 UInventoryComponent::GetEmptyIndex()

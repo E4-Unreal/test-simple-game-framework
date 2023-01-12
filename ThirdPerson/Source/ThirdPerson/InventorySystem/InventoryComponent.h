@@ -7,6 +7,9 @@
 #include "ThirdPerson/Item/ItemDefinition.h"
 #include "InventoryComponent.generated.h"
 
+// 이벤트 디스패처 매크로
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInventoryDelegate);
+
 UCLASS( Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class THIRDPERSON_API UInventoryComponent : public UActorComponent
 {
@@ -19,12 +22,19 @@ public:
 	// 멤버 함수
 	void Init(int32 InventorySlots);
 	bool AddItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
+
+	UFUNCTION(BlueprintCallable)
+	bool SwapItems(int32 SourceIndex, int32 DestinationIndex);
 	
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int32 GetMaxInventorySlots() const { return MaxInventorySlots; }
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE TArray<FInventoryItem> GetInventory() const { return Inventory; }
+
+	// 이벤트 디스패처
+	UPROPERTY(BlueprintAssignable, Category = "Test")
+	FInventoryDelegate OnUpdate;
 	
 protected:
 	// 멤버 변수
@@ -36,6 +46,7 @@ protected:
 	int32 GetEmptyIndex();
 	bool FillSameItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
 	FORCEINLINE bool IsAddable() const { return Inventory.Num() < MaxInventorySlots; }
+	FORCEINLINE FInventoryItem* GetInventoryItemByIndex(int32 Index) { return Inventory.FindByKey(Index); }
 	
 	// Called when the game starts
 	virtual void BeginPlay() override;
