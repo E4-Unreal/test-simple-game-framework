@@ -24,6 +24,9 @@ public:
 	bool AddItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
 
 	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void RemoveInventoryItemByIndex(int32 Index) { Inventory.RemoveSingle(*Inventory.FindByKey(Index)); }
+
+	UFUNCTION(BlueprintCallable)
 	bool SwapItems(int32 SourceIndex, int32 DestinationIndex);
 	
 	UFUNCTION(BlueprintCallable)
@@ -46,7 +49,7 @@ protected:
 	int32 GetEmptyIndex();
 	bool FillSameItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
 	FORCEINLINE bool IsAddable() const { return Inventory.Num() < MaxInventorySlots; }
-	FORCEINLINE FInventoryItem* GetInventoryItemByIndex(int32 Index) { return Inventory.FindByKey(Index); }
+	FORCEINLINE FInventoryItem* FindInventoryItemByIndex(int32 Index) { return Inventory.FindByKey(Index); }
 	
 	// Called when the game starts
 	virtual void BeginPlay() override;

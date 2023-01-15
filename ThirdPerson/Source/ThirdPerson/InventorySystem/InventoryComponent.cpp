@@ -86,8 +86,8 @@ bool UInventoryComponent::SwapItems(int32 SourceIndex, int32 DestinationIndex)
 	if(DestinationIndex < 0 || DestinationIndex >= MaxInventorySlots) { return bSucceed; }
 
 	// InventoryItem->InventoryIndex Swap
-	FInventoryItem* SourceItem = GetInventoryItemByIndex(SourceIndex);
-	FInventoryItem* DestinationItem = GetInventoryItemByIndex(DestinationIndex);
+	FInventoryItem* SourceItem = FindInventoryItemByIndex(SourceIndex);
+	FInventoryItem* DestinationItem = FindInventoryItemByIndex(DestinationIndex);
 
 	if(SourceItem)
 	{

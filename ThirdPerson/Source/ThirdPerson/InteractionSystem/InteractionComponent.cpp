@@ -3,7 +3,9 @@
 
 #include "InteractionComponent.h"
 #include "Interactable.h"
+#include "BehaviorTree/BehaviorTreeTypes.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "ThirdPerson/ThirdPerson.h"
 
 // Sets default values for this component's properties
@@ -35,22 +37,26 @@ AActor* UInteractionComponent::DetectActor()
 	}
 	
 	FHitResult HitResult;
-
-	FCollisionQueryParams Params;
-	// InteractionComponent가 부착된 액터 무시
-	Params.AddIgnoredActor(GetOwner());
 	
-	bool bResult = GetWorld()->SweepSingleByChannel(
-		HitResult,
-		 PlayerCamera->GetComponentLocation(),
+	// SphereTrace에서 무시할 액터들
+	TArray<AActor*> ActorsToIgnore;
+
+	// todo EDrawDebugTrace를 에디터 노출시키고 싶다
+	bool bResult = UKismetSystemLibrary::SphereTraceSingle(
+		GetWorld(),
+		GetOwner()->GetActorLocation(),
 		PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * 1500.0f,
-		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel5, 
-		FCollisionShape::MakeSphere(10.0f),
-		Params);
+		10.0f,
+		ETraceTypeQuery::TraceTypeQuery1,
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::None,
+		HitResult,
+		true);
         
 	if (bResult)
 	{
+		UE_LOG(LogInteraction, Log, TEXT("InteractionComponent::DetectActor\nHitResult: %s"), *HitResult.GetActor()->GetName());
 		return HitResult.GetActor();
 	}
 	else
@@ -66,7 +72,12 @@ void UInteractionComponent::Interact()
 		// UInteractable 상속 여부 체크
 		if(DetectedActor->GetClass()->ImplementsInterface(UInteractable::StaticClass()))
 		{
+			UE_LOG(LogInteraction, Log, TEXT("InteractionComponent::Interact\nIInteractable::Execute_Interact is available"));
 			IInteractable::Execute_Interact(DetectedActor, GetOwner());
+		}
+		else
+		{
+			UE_LOG(LogInteraction, Warning, TEXT("InteractionComponent::Interact\nIInteractable::Execute_Interact is not available"));
 		}
 	}
 }

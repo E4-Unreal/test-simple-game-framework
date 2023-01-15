@@ -84,10 +84,16 @@ public:
 	bool Add(int32& NewCount);
 
 	FORCEINLINE bool IsAddable() const { return ItemDefinition->MaxStack > Count; }
-	
+
+	// For TArray.Remove
+	FORCEINLINE bool operator==(FInventoryItem Other) const { return this->InventoryIndex == Other.InventoryIndex; }
+	FORCEINLINE bool operator!=(FInventoryItem Other) const { return this->InventoryIndex == Other.InventoryIndex; }
+
+	// For Searching Item in Inventory
 	FORCEINLINE bool operator==(UItemDefinition* Other) const { return this->ItemDefinition == Other; }
 	FORCEINLINE bool operator!=(UItemDefinition* Other) const { return this->ItemDefinition == Other; }
-	
+
+	// For TArray.FindByKey
 	FORCEINLINE bool operator==(int32 Index) const { return this->InventoryIndex == Index; }
 	FORCEINLINE bool operator!=(int32 Index) const { return this->InventoryIndex == Index; }
 };

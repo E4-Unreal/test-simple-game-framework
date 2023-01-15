@@ -20,21 +20,21 @@ public:
 
 	// 멤버 변수
 	class USphereComponent* Sphere;
-	class UStaticMeshComponent* Mesh;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UStaticMeshComponent* Mesh;
+
+	// 스폰시 노출
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn="true"))
 	UItemDefinition* ItemDefinition;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn="true"))
 	int32 ItemCount;
 
 	// 멤버 함수
 protected:
 	// 초기화
 	void Init();
-	void SetMesh();
-	void SetSphere();
-	void SetCount();
 
 	// 상호작용
 	void AddItemToInventory(AActor* InventoryOwner);

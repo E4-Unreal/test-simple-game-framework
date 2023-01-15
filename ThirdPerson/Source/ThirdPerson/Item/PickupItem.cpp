@@ -25,38 +25,31 @@ APickupItem::APickupItem()
 
 void APickupItem::Init()
 {
-	if(ItemDefinition)
+	// ItemDefinition 유효성 검사
+	if(ItemDefinition == nullptr){ UE_LOG(LogTemp, Warning, TEXT("PickupItem::Init\nItemDefinition is null")); return; }
+	if(ItemDefinition->PickupInfo == nullptr){ UE_LOG(LogTemp, Warning, TEXT("PickupItem::Init\nItemDefinition->PickupInfo is null")); return; }
+
+	// Set Mesh & Destroy if it failed
+	if(!Mesh->SetStaticMesh(ItemDefinition->PickupInfo->DisplayMesh)){ this->Destroy(); return; }
+	Mesh->SetRelativeLocation(ItemDefinition->PickupInfo->MeshOffset);
+
+	// Set Sphere & Do auto scaling if default is 0 or less
+	const float AutoScaling = Mesh->GetStaticMesh()->GetBounds().GetBox().GetSize().Size();
+	const float SphereRadius = ItemDefinition->PickupInfo->SphereRadius;
+	if(SphereRadius < AutoScaling)
 	{
-		SetMesh();
-		SetSphere();
-		SetCount();
+		Sphere->SetSphereRadius(AutoScaling);
+		UE_LOG(LogTemp, Warning, TEXT("PickupItem::Init\nAuto scaling SphereRadius: %f"), AutoScaling);
 	}
+	else
+	{
+		Sphere->SetSphereRadius(SphereRadius);
+	}
+
+	// Set Count
+	ItemCount = ItemDefinition->SpawnCount;
 }
 
-void APickupItem::SetMesh()
-{
-	if(ItemDefinition->PickupInfo)
-	{
-		Mesh->SetStaticMesh(ItemDefinition->PickupInfo->DisplayMesh);
-		Mesh->SetRelativeLocation(ItemDefinition->PickupInfo->MeshOffset);
-	}
-}
-
-void APickupItem::SetSphere()
-{
-	if(ItemDefinition->PickupInfo)
-	{
-		Sphere->SetSphereRadius(ItemDefinition->PickupInfo->SphereRadius);
-	}
-}
-
-void APickupItem::SetCount()
-{
-	if(ItemDefinition->PickupInfo)
-	{
-		ItemCount = ItemDefinition->SpawnCount;
-	} 
-}
 
 void APickupItem::AddItemToInventory(AActor* InventoryOwner)
 {
@@ -85,11 +78,15 @@ void APickupItem::Update()
 
 void APickupItem::Interact_Implementation(AActor* Interactor)
 {
-	TArray<AActor*> OverlappingActors;
-	Sphere->GetOverlappingActors(OverlappingActors);
-	if(OverlappingActors.Find(Interactor))
+	UE_LOG(LogInteraction, Log, TEXT("PickupItem::Interact\nActivated"));
+	if(Sphere->IsOverlappingActor(Interactor))
 	{
+		UE_LOG(LogInteraction, Log, TEXT("PickupItem::Interact\nTry adding item to inventory"));
 		AddItemToInventory(Interactor);
+	}
+	else
+	{
+		UE_LOG(LogInteraction, Warning, TEXT("PickupItem::Interact\nMove closer to pick up item"));
 	}
 }
 
