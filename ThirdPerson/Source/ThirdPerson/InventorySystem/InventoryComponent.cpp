@@ -31,7 +31,7 @@ void UInventoryComponent::Init(int32 InventorySlots)
 
 bool UInventoryComponent::AddItem(UItemDefinition* ItemDefinition, int32& ItemCount)
 {
-	UE_LOG(LogInventory, Log, TEXT("InventoryComponent::AddItem\nItemDefinition: %s / Count: %d"), *ItemDefinition->GetName(), ItemCount);
+	UE_LOG(LogInventory, Log, TEXT("\nInventoryComponent::AddItem\nItemDefinition: %s / Count: %d"), *ItemDefinition->GetName(), ItemCount);
 
 	// 입력된 아이템 유효성 검사
 	if(ItemDefinition == nullptr || ItemCount <= 0)
@@ -76,6 +76,63 @@ bool UInventoryComponent::AddItem(UItemDefinition* ItemDefinition, int32& ItemCo
 		UE_LOG(LogInventory, Log, TEXT("Inventory Is Full"));
 	}
 	return bAdded;
+}
+
+bool UInventoryComponent::GetItemByCount(UItemDefinition* ItemDefinition, int32 NeedCount, int32& AvailableCount)
+{
+	UE_LOG(LogInventory, Log, TEXT("\nInventoryComponent::GetItemByCount\nItemDefinition: %s / NeedCount: %d"), *ItemDefinition->GetName(), NeedCount);
+	// 유효성 검사
+	if(ItemDefinition == nullptr)
+	{
+		UE_LOG(LogInventory, Error, TEXT("ItemDefinition == nullptr"));
+		return false;
+	}
+	if(NeedCount <= 0)
+	{
+		UE_LOG(LogInventory, Error, TEXT("NeedCount <= 0"));
+		return false;
+	}
+	
+	AvailableCount = 0;
+	// 인벤토리에 동일한 아이템 검색
+	TArray<int32> Indices;
+	for(FInventoryItem InventoryItem : Inventory)
+	{
+		if(InventoryItem == ItemDefinition)
+		{
+			Indices.Add(InventoryItem.InventoryIndex);
+		}
+	}
+
+	if(Indices.IsEmpty())
+	{
+		UE_LOG(LogInventory, Warning, TEXT("No %s In Inventory"), *ItemDefinition->GetName());
+		return false;
+	}
+
+	Indices.Sort();
+
+	for(int32 Index : Indices)
+	{
+		FInventoryItem* InventoryItem = Inventory.FindByKey(Index);
+		if(NeedCount >= InventoryItem->Count)
+		{
+			NeedCount -= InventoryItem->Count;
+			AvailableCount += InventoryItem->Count;
+			Inventory.RemoveSingle(*InventoryItem);
+		}
+		else
+		{
+			InventoryItem->Count -= NeedCount;
+			AvailableCount += NeedCount;
+			break;
+		}
+	}
+
+	UE_LOG(LogInventory, Log, TEXT("Get Item From Inventory Complete\nAvailableCount: %d"), AvailableCount);
+	// 이벤트 디스패처 호출
+	OnUpdate.Broadcast();
+	return true;
 }
 
 bool UInventoryComponent::RemoveInventoryItemByIndex(int32 Index, int32 Count)
@@ -159,32 +216,20 @@ bool UInventoryComponent::FillSameItem(UItemDefinition* ItemDefinition, int32& I
 	}
 
 	// 한 번이라도 채웠다면 true 반환
-	if(Indices.IsEmpty())
-	{
-		return false;
-	}
-	else
-	{
-		// 디버깅
-		UE_LOG(LogInventory, Log, TEXT("InventoryComponent::FillSameItem\n"));
-		for(int32 Index : Indices)
-		{
-			UE_LOG(LogInventory, Log, TEXT("%d "), Index);
-		}
-		
-		Indices.Sort();
+	if(Indices.IsEmpty()) { return false; }
 
-		// 차례대로 아이템 개수 추가
-		for(const int32 Index : Indices)
+	Indices.Sort();
+
+	// 차례대로 아이템 개수 추가
+	for(const int32 Index : Indices)
+	{
+		// 입력 아이템 소진 : ItemCount <= 0
+		if(!FindInventoryItemByIndex(Index)->Add(ItemCount))
 		{
-			// 입력 아이템 소진 : ItemCount <= 0
-			if(!FindInventoryItemByIndex(Index)->Add(ItemCount))
-			{
-				break;
-			}
+			break;
 		}
-		return true;
 	}
+	return true;
 }
 
 // Called when the game starts

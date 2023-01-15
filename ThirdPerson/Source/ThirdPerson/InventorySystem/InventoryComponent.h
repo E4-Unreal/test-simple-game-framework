@@ -22,6 +22,9 @@ public:
 	// ¸â¹ö ÇÔ¼ö
 	void Init(int32 InventorySlots);
 	bool AddItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
+
+	UFUNCTION(BlueprintCallable)
+	bool GetItemByCount(class UItemDefinition* ItemDefinition, int32 NeedCount, int32& AvailableCount);
 	
 	UFUNCTION(BlueprintCallable)
 	bool RemoveInventoryItemByIndex(int32 Index, int32 Count);
