@@ -78,6 +78,28 @@ bool UInventoryComponent::AddItem(UItemDefinition* ItemDefinition, int32& ItemCo
 	return bAdded;
 }
 
+bool UInventoryComponent::RemoveInventoryItemByIndex(int32 Index, int32 Count)
+{
+	FInventoryItem* const InventoryItem = Inventory.FindByKey(Index);
+	if(InventoryItem == nullptr) { return false; }
+	if(Count == 0) { return false; }
+		
+	if(InventoryItem->Count == Count)
+	{
+		Inventory.RemoveSingle(*InventoryItem);
+	}
+	else
+	{
+		InventoryItem->Count -= Count;
+	}
+
+	UE_LOG(LogInventory, Log, TEXT("Remove Item From Inventory Complete\nIndex: %d / Count: %d"), Index, Count);
+	// 이벤트 디스패처 호출
+	OnUpdate.Broadcast();
+
+	return true;
+}
+
 bool UInventoryComponent::SwapItems(int32 SourceIndex, int32 DestinationIndex)
 {
 	bool bSucceed = false;
@@ -143,14 +165,20 @@ bool UInventoryComponent::FillSameItem(UItemDefinition* ItemDefinition, int32& I
 	}
 	else
 	{
-		UE_LOG(LogInventory, Log, TEXT("InventoryComponent::FillSameItem"));
+		// 디버깅
+		UE_LOG(LogInventory, Log, TEXT("InventoryComponent::FillSameItem\n"));
+		for(int32 Index : Indices)
+		{
+			UE_LOG(LogInventory, Log, TEXT("%d "), Index);
+		}
+		
 		Indices.Sort();
 
 		// 차례대로 아이템 개수 추가
 		for(const int32 Index : Indices)
 		{
 			// 입력 아이템 소진 : ItemCount <= 0
-			if(!Inventory[Index].Add(ItemCount))
+			if(!FindInventoryItemByIndex(Index)->Add(ItemCount))
 			{
 				break;
 			}

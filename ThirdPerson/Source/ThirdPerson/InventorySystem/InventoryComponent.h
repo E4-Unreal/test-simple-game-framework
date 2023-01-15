@@ -22,9 +22,9 @@ public:
 	// ¸â¹ö ÇÔ¼ö
 	void Init(int32 InventorySlots);
 	bool AddItem(class UItemDefinition* ItemDefinition, int32& ItemCount);
-
+	
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void RemoveInventoryItemByIndex(int32 Index) { Inventory.RemoveSingle(*Inventory.FindByKey(Index)); }
+	bool RemoveInventoryItemByIndex(int32 Index, int32 Count);
 
 	UFUNCTION(BlueprintCallable)
 	bool SwapItems(int32 SourceIndex, int32 DestinationIndex);

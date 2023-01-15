@@ -47,7 +47,18 @@ void APickupItem::Init()
 	}
 
 	// Set Count
-	ItemCount = ItemDefinition->SpawnCount;
+	if(bDefaultCount)
+	{
+		ItemCount = ItemDefinition->SpawnCount;
+	}
+	else
+	{
+		if(ItemCount <= 0)
+		{
+			this->Destroy();
+		}
+	}
+
 }
 
 
