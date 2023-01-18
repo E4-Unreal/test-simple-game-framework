@@ -3,14 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
+#include "ThirdPerson/ThirdPerson.h"
 #include "ItemDefinition.generated.h"
 
 /**
  * 
  */
 
+//////////////////////////////////////////////////////////////////////
+// Pickup Info
+
 class UStaticMesh;
+class AActor;
 
 UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Pickup Info", ShortTooltip = "Data asset used to configure a pickup."))
 class THIRDPERSON_API UPickupInfo : public UDataAsset
@@ -29,6 +35,9 @@ public:
 
 };
 
+//////////////////////////////////////////////////////////////////////
+// Item Definition
+
 UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Item Definition", ShortTooltip = "Data asset used to define a item."))
 class THIRDPERSON_API UItemDefinition : public UDataAsset
 {
@@ -38,6 +47,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName Name;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FGameplayTag ItemTag;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (MultiLine = true))
 	FText Description;
 
@@ -45,15 +57,18 @@ public:
 	UTexture2D* Thumbnail;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 SpawnCount;
+	int32 SpawnCount = 1;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 MaxStack;
+	int32 MaxStack = 1;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UPickupInfo* PickupInfo;
 	
 };
+
+//////////////////////////////////////////////////////////////////////
+// Inventory Item
 
 USTRUCT(Atomic, BlueprintType, Meta = (DisplayName = "Inventory Item", ShortTooltip = "Struct used for InventoryComponent"))
 struct FInventoryItem
@@ -96,4 +111,70 @@ public:
 	// For TArray.FindByKey
 	FORCEINLINE bool operator==(int32 Index) const { return this->InventoryIndex == Index; }
 	FORCEINLINE bool operator!=(int32 Index) const { return this->InventoryIndex == Index; }
+};
+
+//////////////////////////////////////////////////////////////////////
+// Equipment Definition
+
+UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment Definition", ShortTooltip = "Data asset used to define a equipment."))
+class THIRDPERSON_API UEquipmentDefinition : public UItemDefinition
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FGameplayTagContainer EquipmentSlotTags;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<AActor> ClassToSpawn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	USkeletalMesh* DisplayMesh;
+	
+};
+
+//////////////////////////////////////////////////////////////////////
+// Equipment Item
+
+USTRUCT(Atomic, BlueprintType, Meta = (DisplayName = "Equipment Item", ShortTooltip = "Struct used for EquipmentComponent"))
+struct FEquipmentItem
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	// 멤버 변수
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTag EquipmentSlot;
+	
+	UPROPERTY(BlueprintReadOnly)
+	UEquipmentDefinition* EquipmentDefinition = nullptr;
+	
+	UPROPERTY(BlueprintReadOnly)
+	AActor* Equipment = nullptr;
+
+	// 멤버 함수
+	FEquipmentItem() {}
+	FEquipmentItem(FGameplayTag EquipmentSlot)
+	{
+		this->EquipmentSlot = EquipmentSlot;
+	};
+
+	bool IsAddable(UEquipmentDefinition* NewEquipment) const;
+	bool Add(UEquipmentDefinition* NewEquipment, AActor* SpawnedActor);
+
+	//Todo EquipmentComponent에 통합시키는 방법도 있을 것 같다
+	FORCEINLINE AActor* RemoveEquipment()
+	{
+		AActor* ActorToDestroy = Equipment;
+		Equipment = nullptr;
+		return ActorToDestroy;
+	}
+	
+	FORCEINLINE UEquipmentDefinition* RemoveEquipmentDefinition()
+	{
+		UEquipmentDefinition* OldEquipment = EquipmentDefinition;
+		EquipmentDefinition = nullptr;
+		return OldEquipment;
+	}
 };

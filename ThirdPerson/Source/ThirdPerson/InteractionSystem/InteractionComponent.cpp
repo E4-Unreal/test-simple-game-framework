@@ -3,7 +3,6 @@
 
 #include "InteractionComponent.h"
 #include "Interactable.h"
-#include "BehaviorTree/BehaviorTreeTypes.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ThirdPerson/ThirdPerson.h"

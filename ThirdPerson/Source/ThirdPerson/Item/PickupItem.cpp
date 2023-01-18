@@ -26,8 +26,8 @@ APickupItem::APickupItem()
 void APickupItem::Init()
 {
 	// ItemDefinition 유효성 검사
-	if(ItemDefinition == nullptr){ UE_LOG(LogTemp, Warning, TEXT("PickupItem::Init\nItemDefinition is null")); return; }
-	if(ItemDefinition->PickupInfo == nullptr){ UE_LOG(LogTemp, Warning, TEXT("PickupItem::Init\nItemDefinition->PickupInfo is null")); return; }
+	if(ItemDefinition == nullptr){ UE_LOG(LogTemp, Warning, TEXT("PickupItem::Init\nItemDefinition is null")) return; }
+	if(ItemDefinition->PickupInfo == nullptr){ UE_LOG(LogTemp, Warning, TEXT("PickupItem::Init\nItemDefinition->PickupInfo is null")) return; }
 
 	// Set Mesh & Destroy if it failed
 	if(!Mesh->SetStaticMesh(ItemDefinition->PickupInfo->DisplayMesh)){ this->Destroy(); return; }
