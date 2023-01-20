@@ -12,6 +12,26 @@
 // Equipment Sockets
 
 UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment Sockets", ShortTooltip = "Skeletal Mesh Socket Names for Equipment Slots"))
+class THIRDPERSON_API UEquipmentSlots : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	// Todo C++이 아니라 에디터에서 설정할 수 있는 게임플레이 태그를 제한하는 방법은 없을까?
+	
+	// Todo 프로젝트에 설정된 GameplayTag에 따라 meta=(Categories="") 커스터마이징 필요
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="EquipmentSlot"))
+	TArray<FGameplayTag> EquipmentSlotTags;
+
+	// Todo 프로젝트에 설정된 GameplayTag에 따라 meta=(Categories="") 커스터마이징 필요
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="EquipmentSlot.Weapon"))
+	FGameplayTag PrimaryWeaponSlotTag;
+};
+
+//////////////////////////////////////////////////////////////////////
+// Equipment Sockets
+
+UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment Sockets", ShortTooltip = "Skeletal Mesh Socket Names for Equipment Slots"))
 class THIRDPERSON_API UEquipmentSockets : public UDataAsset
 {
 	GENERATED_BODY()
@@ -29,17 +49,18 @@ public:
 
 class AEquipment;
 
-UCLASS(ClassGroup=(Custom), meta=(DisplayName = "Equipment Component", BlueprintSpawnableComponent))
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(DisplayName = "Equipment Component", BlueprintSpawnableComponent))
 class THIRDPERSON_API UEquipmentComponent : public UActorComponent
 {
 	GENERATED_BODY()
 	
 	// 멤버 변수
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FGameplayTag> EquipmentSlots;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UEquipmentSlots* EquipmentSlots;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	// Todo EquipmentSockets->SocketMappings의 Key 값들을 EquipmentSlots에 들어있는 값으로만 설정 할 수 있는 방법은 없을까?
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UEquipmentSockets* EquipmentSockets;
 	
 protected:
@@ -56,7 +77,8 @@ public:
 	bool AddEquipment(UEquipmentDefinition* NewEquipment);
 
 protected:
-	
+
+	const FName* CheckSocket(FEquipmentItem EquipmentItem, const ACharacter* OwnerCharacter) const;
 	AEquipment* SpawnEquipment(UEquipmentDefinition* NewEquipment) const;
 	
 	// Called when the game starts

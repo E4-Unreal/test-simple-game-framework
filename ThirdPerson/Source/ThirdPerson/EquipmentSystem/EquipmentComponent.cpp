@@ -18,13 +18,12 @@ UEquipmentComponent::UEquipmentComponent()
 
 void UEquipmentComponent::Init()
 {
-	for(const FGameplayTag EquipmentSlot : EquipmentSlots)
+	for(const FGameplayTag EquipmentSlot : EquipmentSlots->EquipmentSlotTags)
 	{
 		EquipmentItems.Add(FEquipmentItem(EquipmentSlot));
 	}
 }
 
-//ToDo 리팩토링이 필요해보임
 bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 {
 	for(FEquipmentItem EquipmentItem : EquipmentItems)
@@ -33,28 +32,45 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 		{
 			// 유효성 검사
 			if(NewEquipment == nullptr) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::AddEquipment > NewEquipment == nullptr")) return false; }
-			if(EquipmentSockets == nullptr) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::AddEquipment > EquipmentSockets == nullptr")) EquipmentItem.Add(NewEquipment, nullptr); return true; }
-			
-			// 해당 장비 슬롯에 대응하는 소켓 이름 확인
-			const FName* SocketName = EquipmentSockets->SocketMappings.Find(EquipmentItem.EquipmentSlot);
-			if(SocketName->IsNone()){ UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::AddEquipment > SocketName->IsNone()")) EquipmentItem.Add(NewEquipment, nullptr); return true;}
 
-			// Owner의 스켈레탈 메시 애셋에 대응하는 소켓이 존재하는지 확인
+			// 장비 슬롯에 대응하는 소켓명 확인
 			const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-			USkeletalMeshSocket* SkeletalMeshSocket = OwnerCharacter->GetMesh()->GetSkeletalMeshAsset()->FindSocket(*SocketName);
-			if(SkeletalMeshSocket == nullptr) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::AddEquipment > SkeletalMeshSocket == nullptr!")) EquipmentItem.Add(NewEquipment, nullptr); return true; }
+			if(OwnerCharacter == nullptr){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::AddEquipment > OwnerCharacter == nullptr")) return nullptr; }
+			const FName* SocketName = CheckSocket(EquipmentItem, OwnerCharacter);
+			if(SocketName == nullptr) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::AddEquipment > SocketName == nullptr")) EquipmentItem.Add(NewEquipment, nullptr); return true; }
 			
 			// 장비 스폰
 			AEquipment* SpawnedEquipment = SpawnEquipment(NewEquipment);
-			if(SpawnedEquipment == nullptr) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::AddEquipment > SpawnedEquipment == nullptr!")) EquipmentItem.Add(NewEquipment, nullptr); return true; }
-
+			if(SpawnedEquipment == nullptr) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::AddEquipment > SpawnedEquipment == nullptr")) EquipmentItem.Add(NewEquipment, nullptr); return true; }
+			
 			// 장비를 소켓에 부착
 			SpawnedEquipment->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, *SocketName);
 			EquipmentItem.Add(NewEquipment, SpawnedEquipment);
 			return true;
 		}
 	}
+	UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::AddEquipment > Equipment Slots are full or %s is not exist in Equipment Slots"), *NewEquipment->EquipmentSlotTag.GetTagName().ToString())
 	return false;
+}
+
+const FName* UEquipmentComponent::CheckSocket(FEquipmentItem EquipmentItem, const ACharacter* OwnerCharacter) const
+{
+	// 유효성 검사
+	if(EquipmentSockets == nullptr) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::CheckSocket > EquipmentSockets == nullptr")) return nullptr; }
+	if(OwnerCharacter == nullptr){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::CheckSocket > OwnerCharacter == nullptr")) return nullptr; }
+
+	// 해당 장비 슬롯에 대응하는 소켓 이름 확인
+	const FName* SocketName = EquipmentSockets->SocketMappings.Find(EquipmentItem.EquipmentSlot);
+	if(SocketName == nullptr){ UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::CheckSocket > Check %s is in %s / SocketName == nullptr"), *EquipmentItem.EquipmentSlot.GetTagName().ToString(), *EquipmentSockets->GetName()) return nullptr;}
+	if(SocketName->IsNone()){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::CheckSocket > Check %s is initialized / SocketName->IsNone()"), *EquipmentSockets->GetName()) return nullptr;}
+
+	// EquipmentSockets 데이터 에셋의 기준 스켈레탈 메시 에셋에 대응하는 소켓이 존재하는지 확인
+	if(EquipmentSockets->SkeletalMeshAsset->FindSocket(*SocketName) == nullptr) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::CheckSocket > Check %s is set in %s"), *SocketName->ToString(), *EquipmentSockets->SkeletalMeshAsset->GetName())}
+	
+	// OwnerCharacter의 스켈레탈 메시 애셋에 대응하는 소켓이 존재하는지 확인
+	if(OwnerCharacter->GetMesh()->GetSkeletalMeshAsset()->FindSocket(*SocketName) == nullptr) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::CheckSocket > Check %s is set in %s"), *SocketName->ToString(), *OwnerCharacter->GetMesh()->GetSkeletalMeshAsset()->GetName()) return nullptr; }
+
+	return SocketName;
 }
 
 AEquipment* UEquipmentComponent::SpawnEquipment(UEquipmentDefinition* NewEquipment) const
@@ -70,6 +86,14 @@ AEquipment* UEquipmentComponent::SpawnEquipment(UEquipmentDefinition* NewEquipme
 	{
 		SpawnedEquipment->EquipmentDefinition = NewEquipment;
 		SpawnedEquipment->FinishSpawning(SpawnLocAndRotation);
+	}
+
+	// 스폰된 장비의 스켈레탈 메시가 제대로 설정되었는지 확인
+	if(SpawnedEquipment->SkeletalMesh->GetSkeletalMeshAsset() == nullptr)
+	{
+		UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SpawnEquipment > SpawnedEquipment->SkeletalMesh->GetSkeletalMeshAsset() == nullptr"))
+		SpawnedEquipment->Destroy();
+		return nullptr;
 	}
 	
 	return SpawnedEquipment;

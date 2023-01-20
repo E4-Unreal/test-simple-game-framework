@@ -18,8 +18,8 @@ public:
 	static void InitializeNativeTags();
 
 	// Equipment Slots
-	FGameplayTag EquipmentSlot_Weapon_Primary;
-	FGameplayTag EquipmentSlot_Weapon_Secondary;
+	FGameplayTag EquipmentSlot_Weapon_Main_Primary;
+	FGameplayTag EquipmentSlot_Weapon_Main_Secondary;
 	FGameplayTag EquipmentSlot_Weapon_SideArm;
 	FGameplayTag EquipmentSlot_Armor_Head;
 	FGameplayTag EquipmentSlot_Armor_Chest;

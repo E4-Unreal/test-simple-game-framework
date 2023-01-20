@@ -38,13 +38,13 @@ bool FInventoryItem::Add(int32& NewCount)
 //////////////////////////////////////////////////////////////////////
 // Equipment Item
 
-bool FEquipmentItem::IsAddable(UEquipmentDefinition* NewEquipment) const
+bool FEquipmentItem::IsAddable(const UEquipmentDefinition* NewEquipment) const
 {
 	// Check Empty
 	if(EquipmentDefinition != nullptr || Equipment != nullptr){ return false; }
 
 	// Check NewEquipment can be added to here
-	if(!EquipmentSlot.MatchesAnyExact(NewEquipment->EquipmentSlotTags)){ return false; }
+	if(!EquipmentSlot.MatchesTag(NewEquipment->EquipmentSlotTag)){ return false; }
 
 	return true;
 }
@@ -61,6 +61,7 @@ bool FEquipmentItem::Add(UEquipmentDefinition* NewEquipment, AActor* SpawnedActo
 	
 	EquipmentDefinition = NewEquipment;
 	Equipment = SpawnedActor;
-	
+
+	UE_LOG(LogEquipment, Log, TEXT("FEquipmentItem::Add > Succeed"))
 	return true;
 }

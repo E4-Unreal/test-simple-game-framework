@@ -124,7 +124,7 @@ class THIRDPERSON_API UEquipmentDefinition : public UItemDefinition
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FGameplayTagContainer EquipmentSlotTags;
+	FGameplayTag EquipmentSlotTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AActor> ClassToSpawn;
@@ -160,7 +160,7 @@ public:
 		this->EquipmentSlot = EquipmentSlot;
 	};
 
-	bool IsAddable(UEquipmentDefinition* NewEquipment) const;
+	bool IsAddable(const UEquipmentDefinition* NewEquipment) const;
 	bool Add(UEquipmentDefinition* NewEquipment, AActor* SpawnedActor);
 
 	//Todo EquipmentComponent에 통합시키는 방법도 있을 것 같다

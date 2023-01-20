@@ -17,8 +17,8 @@ void FThirdPersonGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 {
 	
 	// Equipment Slots
-	AddTag(EquipmentSlot_Weapon_Primary, "EquipmentSlot.Weapon.Primary", "EquipmentSlot for Primary Weapon");
-	AddTag(EquipmentSlot_Weapon_Secondary, "EquipmentSlot.Weapon.Secondary", "EquipmentSlot for Secondary Weapon");
+	AddTag(EquipmentSlot_Weapon_Main_Primary, "EquipmentSlot.Weapon.Main.Primary", "EquipmentSlot for Primary Weapon");
+	AddTag(EquipmentSlot_Weapon_Main_Secondary, "EquipmentSlot.Weapon.Main.Secondary", "EquipmentSlot for Secondary Weapon");
 	AddTag(EquipmentSlot_Weapon_SideArm, "EquipmentSlot.Weapon.SideArm", "EquipmentSlot for SideArm Weapon");
 	AddTag(EquipmentSlot_Armor_Head, "EquipmentSlot.Armor.Head", "EquipmentSlot for Head Armor");
 	AddTag(EquipmentSlot_Armor_Chest, "EquipmentSlot.Armor.Chest", "EquipmentSlot for Chest Armor");
