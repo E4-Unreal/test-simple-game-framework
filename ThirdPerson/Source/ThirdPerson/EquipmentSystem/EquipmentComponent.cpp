@@ -21,12 +21,15 @@ void UEquipmentComponent::Init()
 	for(const FGameplayTag EquipmentSlot : EquipmentSlots->EquipmentSlotTags)
 	{
 		EquipmentItems.Add(FEquipmentItem(EquipmentSlot));
+		UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::Init > EquipmentItem.EquipmentSlot: %s"), *EquipmentSlot.GetTagName().ToString())
 	}
+	
+	UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::Init > EquipmentItems.Num(): %d"), EquipmentItems.Num())
 }
 
 bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 {
-	for(FEquipmentItem EquipmentItem : EquipmentItems)
+	for(FEquipmentItem& EquipmentItem : EquipmentItems)
 	{
 		if(EquipmentItem.IsAddable(NewEquipment))
 		{
