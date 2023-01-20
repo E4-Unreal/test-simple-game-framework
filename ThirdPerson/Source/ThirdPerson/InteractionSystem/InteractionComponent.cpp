@@ -55,7 +55,7 @@ AActor* UInteractionComponent::DetectActor()
         
 	if (bResult)
 	{
-		UE_LOG(LogInteraction, Log, TEXT("InteractionComponent::DetectActor\nHitResult: %s"), *HitResult.GetActor()->GetName());
+		UE_LOG(LogInteraction, Log, TEXT("InteractionComponent::DetectActor > %s"), *HitResult.GetActor()->GetName());
 		return HitResult.GetActor();
 	}
 	else
@@ -71,12 +71,12 @@ void UInteractionComponent::Interact()
 		// UInteractable 상속 여부 체크
 		if(DetectedActor->GetClass()->ImplementsInterface(UInteractable::StaticClass()))
 		{
-			UE_LOG(LogInteraction, Log, TEXT("InteractionComponent::Interact\nIInteractable::Execute_Interact is available"));
+			UE_LOG(LogInteraction, Log, TEXT("InteractionComponent::Interact > %s can use IInteractable::Execute_Interact"), *DetectedActor->GetName());
 			IInteractable::Execute_Interact(DetectedActor, GetOwner());
 		}
 		else
 		{
-			UE_LOG(LogInteraction, Warning, TEXT("InteractionComponent::Interact\nIInteractable::Execute_Interact is not available"));
+			UE_LOG(LogInteraction, Warning, TEXT("InteractionComponent::Interact > %s cannot use IInteractable::Execute_Interact"), *DetectedActor->GetName());
 		}
 	}
 }

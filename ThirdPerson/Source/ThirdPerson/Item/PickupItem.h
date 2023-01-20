@@ -37,14 +37,16 @@ public:
 	// 멤버 함수
 protected:
 	// 초기화
+	// Init()에서 ItemDefinition 유효성 확인 끝남
 	void Init();
 
 	// 상호작용
-	void AddItemToInventory(AActor* InventoryOwner);
+	void AddItemToInventory(const AActor* InventoryOwner);
+	void AddItemToEquipment(const AActor* EquipmentOwner);
 	void Update();
 
 	// IInteractable
-	virtual void Interact_Implementation(AActor* Interactor) override;
+	virtual void Interact_Implementation(const AActor* Interactor) override;
 
 protected:
 	// Called when the game starts or when spawned

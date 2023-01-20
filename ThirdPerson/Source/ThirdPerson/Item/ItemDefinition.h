@@ -27,8 +27,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMesh* DisplayMesh;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FVector MeshOffset;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MeshOffset")
+	FVector Location;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MeshOffset")
+	FRotator Rotation;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float SphereRadius;
@@ -47,7 +50,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName Name;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	// Todo C++이 아니라 에디터에서 설정할 수 있는 게임플레이 태그를 제한하는 방법은 없을까?
+	// Todo 프로젝트에 설정된 GameplayTag에 따라 meta=(Categories="") 커스터마이징 필요
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="Item"))
 	FGameplayTag ItemTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (MultiLine = true))
@@ -122,6 +127,7 @@ class THIRDPERSON_API UEquipmentDefinition : public UItemDefinition
 	GENERATED_BODY()
 
 public:
+	// Todo EquipmentDefinition에서는 ItemDefinition->ItemTag의 meta=(Categories="Item")을 meta=(Categories="Item.Equipment")로 변경할 방법은 없을까?
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FGameplayTag EquipmentSlotTag;

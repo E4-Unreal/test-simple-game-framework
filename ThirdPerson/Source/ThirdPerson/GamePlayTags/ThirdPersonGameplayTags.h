@@ -27,6 +27,12 @@ public:
 	FGameplayTag EquipmentSlot_Armor_Arm;
 
 	// Item Tags
+	FGameplayTag Item;
+	FGameplayTag Item_Clutter;
+	FGameplayTag Item_Consumable;
+
+	// Item.Equipment Tags
+	FGameplayTag Item_Equipment;
 	FGameplayTag Item_Equipment_Weapon_Melee_Knife;
 	FGameplayTag Item_Equipment_Weapon_Ranged_Gun_Rifle;
 	FGameplayTag Item_Equipment_Weapon_Ranged_Gun_ShotGun;

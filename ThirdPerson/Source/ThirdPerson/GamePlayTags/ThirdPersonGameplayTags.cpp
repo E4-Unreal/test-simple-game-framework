@@ -26,6 +26,12 @@ void FThirdPersonGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 	AddTag(EquipmentSlot_Armor_Arm, "EquipmentSlot.Armor.Arm", "EquipmentSlot for Arm Armor");
 
 	// Item Tags
+	AddTag(Item, "Item", "Item");
+	AddTag(Item_Clutter, "Item.Clutter", "Clutter Item");
+	AddTag(Item_Consumable, "Item.Consumable", "Consumable Item");
+	
+	// Item.Equipment Tags
+	AddTag(Item_Equipment, "Item.Equipment", "Equipment Item");
 	AddTag(Item_Equipment_Weapon_Melee_Knife, "Item.Equipment.Weapon.Melee.Knife", "Knife is type of Melee Weapon");
 	AddTag(Item_Equipment_Weapon_Ranged_Gun_Rifle, "Item.Equipment.Weapon.Ranged.Gun.Rifle", "Rifle is type of Gun");
 	AddTag(Item_Equipment_Weapon_Ranged_Gun_ShotGun, "Item.Equipment.Weapon.Ranged.Gun.ShotGun", "ShotGun is type of Gun");

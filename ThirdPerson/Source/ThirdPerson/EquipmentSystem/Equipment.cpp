@@ -14,7 +14,7 @@ AEquipment::AEquipment()
 	
 	// 씬 컴포넌트 초기화
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
-	SkeletalMesh->SetupAttachment(RootComponent);
+	RootComponent = SkeletalMesh;
 }
 
 void AEquipment::Init()
