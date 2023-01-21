@@ -6,6 +6,10 @@
 #include "GameplayTagsManager.h"
 #include "Engine/EngineTypes.h"
 
+// Convert VariableName to TagName
+// ex) FGameplayTag Item_Equipment > "Item.Equipment"
+#define ADD_TAG(VariableName, TagComment) AddTag(VariableName, TCHAR_TO_ANSI(*FString(# VariableName).Replace(TEXT("_"), TEXT("."))), TagComment)
+
 FThirdPersonGameplayTags FThirdPersonGameplayTags::GameplayTags;
 
 void FThirdPersonGameplayTags::InitializeNativeTags()
@@ -19,33 +23,50 @@ void FThirdPersonGameplayTags::InitializeNativeTags()
 
 void FThirdPersonGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 {
-	
-	// Equipment Slots
-	AddTag(EquipmentSlot_Weapon_Main_Primary, "EquipmentSlot.Weapon.Main.Primary", "EquipmentSlot for Primary Weapon");
-	AddTag(EquipmentSlot_Weapon_Main_Secondary, "EquipmentSlot.Weapon.Main.Secondary", "EquipmentSlot for Secondary Weapon");
-	AddTag(EquipmentSlot_Weapon_SideArm, "EquipmentSlot.Weapon.SideArm", "EquipmentSlot for SideArm Weapon");
-	AddTag(EquipmentSlot_Armor_Head, "EquipmentSlot.Armor.Head", "EquipmentSlot for Head Armor");
-	AddTag(EquipmentSlot_Armor_Chest, "EquipmentSlot.Armor.Chest", "EquipmentSlot for Chest Armor");
-	AddTag(EquipmentSlot_Armor_Leg, "EquipmentSlot.Armor.Leg", "EquipmentSlot for Leg Armor");
-	AddTag(EquipmentSlot_Armor_Arm, "EquipmentSlot.Armor.Arm", "EquipmentSlot for Arm Armor");
+	// Equipment Slot
+	ADD_TAG(EquipmentSlot, "EquipmentSlot for Equipment");
+	ADD_TAG(EquipmentSlot_Active, "EquipmentSlot for Active Equipment");
+	ADD_TAG(EquipmentSlot_Passive, "EquipmentSlot for Passive Equipment");
+	// EquipmentSlot.Active
+	ADD_TAG(EquipmentSlot_Active_Main, "EquipmentSlot for Main Active Equipment");
+	ADD_TAG(EquipmentSlot_Active_Main_Primary, "Primary EquipmentSlot for Main Active Equipment");
+	ADD_TAG(EquipmentSlot_Active_Main_Secondary, "Secondary EquipmentSlot for Main Active Equipment");
+	ADD_TAG(EquipmentSlot_Active_Sub, "EquipmentSlot for Sub Active Equipment");
+	ADD_TAG(EquipmentSlot_Active_Sub_SideArm, "EquipmentSlot for SideArm");
+	ADD_TAG(EquipmentSlot_Active_Sub_Throwing01, "First EquipmentSlot for Throwing");
+	ADD_TAG(EquipmentSlot_Active_Sub_Throwing02, "Second EquipmentSlot for Throwing");
+	// EquipmentSlot.Passive
+	ADD_TAG(EquipmentSlot_Passive_Armor, "EquipmentSlot for Armor");
+	ADD_TAG(EquipmentSlot_Passive_Armor_Head, "EquipmentSlot for Head Armor");
+	ADD_TAG(EquipmentSlot_Passive_Armor_Chest, "EquipmentSlot for Chest Armor");
+	ADD_TAG(EquipmentSlot_Passive_Armor_Leg, "EquipmentSlot for Leg Armor");
+	ADD_TAG(EquipmentSlot_Passive_Armor_Arm, "EquipmentSlot for Arm Armor");
 
-	// Item Tags
-	AddTag(Item, "Item", "Item");
-	AddTag(Item_Clutter, "Item.Clutter", "Clutter Item");
-	AddTag(Item_Consumable, "Item.Consumable", "Consumable Item");
-	
-	// Item.Equipment Tags
-	AddTag(Item_Equipment, "Item.Equipment", "Equipment Item");
-	AddTag(Item_Equipment_Weapon_Melee_Knife, "Item.Equipment.Weapon.Melee.Knife", "Knife is type of Melee Weapon");
-	AddTag(Item_Equipment_Weapon_Ranged_Gun_Rifle, "Item.Equipment.Weapon.Ranged.Gun.Rifle", "Rifle is type of Gun");
-	AddTag(Item_Equipment_Weapon_Ranged_Gun_ShotGun, "Item.Equipment.Weapon.Ranged.Gun.ShotGun", "ShotGun is type of Gun");
-	AddTag(Item_Equipment_Weapon_Ranged_Gun_Pistol, "Item.Equipment.Weapon.Ranged.Gun.Pistol", "Pistol is type of Gun");
-	AddTag(Item_Equipment_Armor_Head, "Item.Equipment.Armor.Head", "Head Armor");
-	AddTag(Item_Equipment_Armor_Chest, "Item.Equipment.Armor.Chest", "Chest Armor");
-	AddTag(Item_Equipment_Armor_Leg, "Item.Equipment.Armor.Leg", "Leg Armor");
-	AddTag(Item_Equipment_Armor_Arm, "Item.Equipment.Armor.Arm", "Arm Armor");
+	// Item
+	ADD_TAG(Item, "Item");
+	ADD_TAG(Item_Clutter, "Clutter Item");
+	ADD_TAG(Item_Consumable, "Consumable Item");
+	ADD_TAG(Item_Equipment, "Equipment Item");
+	// Item.Equipment.Active
+	ADD_TAG(Item_Equipment_Active, "Active Equipment");
+	ADD_TAG(Item_Equipment_Active_Weapon, "Weapon is Active Equipment ");
+	ADD_TAG(Item_Equipment_Active_Weapon_Melee, "Melee Weapon");
+	ADD_TAG(Item_Equipment_Active_Weapon_Melee_Knife, "Knife is Melee Weapon");
+	ADD_TAG(Item_Equipment_Active_Weapon_Ranged, "Ranged Weapon");
+	ADD_TAG(Item_Equipment_Active_Weapon_Ranged_Gun, "Gun is Ranged Weapon");
+	ADD_TAG(Item_Equipment_Active_Weapon_Ranged_Gun_Rifle, "Rifle is Gun Weapon");
+	ADD_TAG(Item_Equipment_Active_Weapon_Ranged_Gun_ShotGun, "ShotGun is Gun Weapon");
+	ADD_TAG(Item_Equipment_Active_Weapon_Ranged_Gun_Pistol, "Pistol is Gun Weapon");
+	// Item.Equipment.Passive
+	ADD_TAG(Item_Equipment_Passive, "Passive Equipment");
+	ADD_TAG(Item_Equipment_Passive_Armor, "Armor is Passive Equipment");
+	ADD_TAG(Item_Equipment_Passive_Armor_Head, "Head Armor");
+	ADD_TAG(Item_Equipment_Passive_Armor_Chest, "Chest Armor");
+	ADD_TAG(Item_Equipment_Passive_Armor_Leg, "Leg Armor");
+	ADD_TAG(Item_Equipment_Passive_Armor_Arm, "Arm Armor");
 }
 
+// Todo OutTag의 변수명을 분석하여 TagName을 자동으로 추가하는 기능 필요
 void FThirdPersonGameplayTags::AddTag(FGameplayTag& OutTag, const ANSICHAR* TagName, const ANSICHAR* TagComment)
 {
 	OutTag = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TagName), FString(TEXT("(Native) ")) + FString(TagComment));

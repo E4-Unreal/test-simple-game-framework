@@ -109,15 +109,15 @@ public:
 
 	// For TArray.Remove
 	FORCEINLINE bool operator==(FInventoryItem Other) const { return this->InventoryIndex == Other.InventoryIndex; }
-	FORCEINLINE bool operator!=(FInventoryItem Other) const { return this->InventoryIndex == Other.InventoryIndex; }
+	FORCEINLINE bool operator!=(FInventoryItem Other) const { return this->InventoryIndex != Other.InventoryIndex; }
 
 	// For Searching Item in Inventory
 	FORCEINLINE bool operator==(UItemDefinition* Other) const { return this->ItemDefinition == Other; }
-	FORCEINLINE bool operator!=(UItemDefinition* Other) const { return this->ItemDefinition == Other; }
+	FORCEINLINE bool operator!=(UItemDefinition* Other) const { return this->ItemDefinition != Other; }
 
 	// For TArray.FindByKey
 	FORCEINLINE bool operator==(int32 Index) const { return this->InventoryIndex == Index; }
-	FORCEINLINE bool operator!=(int32 Index) const { return this->InventoryIndex == Index; }
+	FORCEINLINE bool operator!=(int32 Index) const { return this->InventoryIndex != Index; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -160,14 +160,17 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	AActor* Equipment = nullptr;
-
+	
 	// ¸â¹ö ÇÔ¼ö
 	FEquipmentItem() {}
 	FEquipmentItem(FGameplayTag EquipmentSlot)
 	{
 		this->EquipmentSlot = EquipmentSlot;
 	};
-
+	
+	FORCEINLINE bool IsEmpty() const { return EquipmentDefinition == nullptr && !IsSpawned(); }
+	FORCEINLINE bool IsSpawned() const { return Equipment != nullptr; }
+	
 	bool IsAddable(const UEquipmentDefinition* NewEquipment) const;
 	bool Add(UEquipmentDefinition* NewEquipment, AActor* SpawnedActor);
 
@@ -185,4 +188,8 @@ public:
 		EquipmentDefinition = nullptr;
 		return OldEquipment;
 	}
+
+	// For TArray.FindByKey
+	FORCEINLINE bool operator==(FGameplayTag Other) const { return this->EquipmentSlot.MatchesTagExact(Other); }
+	FORCEINLINE bool operator!=(FGameplayTag Other) const { return !this->EquipmentSlot.MatchesTagExact(Other); }
 };

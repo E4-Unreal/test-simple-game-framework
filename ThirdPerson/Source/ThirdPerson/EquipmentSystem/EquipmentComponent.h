@@ -11,23 +11,27 @@
 #include "EquipmentComponent.generated.h"
 
 //////////////////////////////////////////////////////////////////////
-// Equipment Sockets
+// Equipment Slots
 
 UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment Sockets", ShortTooltip = "Skeletal Mesh Socket Names for Equipment Slots"))
-class THIRDPERSON_API UEquipmentSlots : public UDataAsset
+class THIRDPERSON_API UEquipmentSlotTags : public UDataAsset
 {
 	GENERATED_BODY()
 
-public:
+protected:
 	// Todo C++이 아니라 에디터에서 설정할 수 있는 게임플레이 태그를 제한하는 방법은 없을까?
 	
 	// Todo 프로젝트에 설정된 GameplayTag에 따라 meta=(Categories="") 커스터마이징 필요
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="EquipmentSlot"))
-	TArray<FGameplayTag> EquipmentSlotTags;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(Categories="EquipmentSlot"))
+	TArray<FGameplayTag> All;
 
 	// Todo 프로젝트에 설정된 GameplayTag에 따라 meta=(Categories="") 커스터마이징 필요
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="EquipmentSlot.Weapon"))
-	FGameplayTag PrimaryWeaponSlotTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(Categories="EquipmentSlot.Main"))
+	FGameplayTag Primary;
+
+public:
+	FORCEINLINE TArray<FGameplayTag> GetAll() const { return All; }
+	FORCEINLINE FGameplayTag GetPrimary() const { return Primary; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -38,12 +42,16 @@ class THIRDPERSON_API UEquipmentSockets : public UDataAsset
 {
 	GENERATED_BODY()
 
-public:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	USkeletalMesh* SkeletalMeshAsset;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<FGameplayTag, FName> SocketMappings;
+	
+public:
+	FORCEINLINE USkeletalMesh* GetSkeletalMeshAsset() const { return SkeletalMeshAsset; }
+	FORCEINLINE TMap<FGameplayTag, FName> GetSocketMappings() const { return SocketMappings; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -59,7 +67,7 @@ class THIRDPERSON_API UEquipmentComponent : public UActorComponent
 	// 멤버 변수
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	UEquipmentSlots* EquipmentSlots;
+	UEquipmentSlotTags* EquipmentSlotTags;
 
 	// Todo EquipmentSockets->SocketMappings의 Key 값들을 EquipmentSlots에 들어있는 값으로만 설정 할 수 있는 방법은 없을까?
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -67,6 +75,13 @@ public:
 	
 protected:
 	TArray<FEquipmentItem> EquipmentItems;
+
+	// For SelectEquipment()
+	FGameplayTag SelectableTag;
+	FGameplayTag MainTag;
+	FGameplayTag PrimarySlot;
+	FGameplayTag CurrentSlot;
+	FGameplayTag SubSlot;
 
 	// 멤버 함수
 public:
@@ -78,10 +93,39 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool AddEquipment(UEquipmentDefinition* NewEquipment);
 
+	UFUNCTION(BlueprintCallable)
+	bool SelectEquipment(const FGameplayTag SelectedSlot);
+
 protected:
 
-	const FName* CheckSocket(FEquipmentItem EquipmentItem, const ACharacter* OwnerCharacter) const;
+	const FName* CheckSocket(const FGameplayTag EquipmentSlot) const;
 	AEquipment* SpawnEquipment(UEquipmentDefinition* NewEquipment) const;
+	FORCEINLINE AActor* GetEquipment(const FGameplayTag Slot){ return EquipmentItems.FindByKey(Slot)->Equipment; }
+	void MoveEquipmentToSlot(const FGameplayTag OriginSlot, const FGameplayTag DestSlot);
+	FORCEINLINE void RestoreEquipmentToSlot(const FGameplayTag EquipmentSlot){ MoveEquipmentToSlot(EquipmentSlot, EquipmentSlot); }
+	FORCEINLINE void SwapSlots(const FGameplayTag OriginSlot, const FGameplayTag DestSlot)
+	{
+		MoveEquipmentToSlot(OriginSlot, DestSlot);
+		MoveEquipmentToSlot(DestSlot, OriginSlot);
+	}
+	FORCEINLINE void SwapMainToMain(const FGameplayTag SelectedSlot)
+	{
+		if(CurrentSlot.MatchesTagExact(PrimarySlot))
+		{
+			SwapSlots(CurrentSlot, SelectedSlot);
+		}
+		else if(SelectedSlot.MatchesTagExact(PrimarySlot))
+		{
+			RestoreEquipmentToSlot(PrimarySlot);
+			RestoreEquipmentToSlot(CurrentSlot);
+		}
+		else
+		{
+			RestoreEquipmentToSlot(CurrentSlot);
+			SwapSlots(PrimarySlot, SelectedSlot);
+		}
+	}
+	bool SetActorDisabled(const bool bDisable, AActor* SpawnedActor);
 	
 	// Called when the game starts
 	virtual void BeginPlay() override;

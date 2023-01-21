@@ -21,33 +21,49 @@ public:
 
 	static void InitializeNativeTags();
 
-	// Equipment Slots
-	FGameplayTag EquipmentSlot_Weapon_Main_Primary;
-	FGameplayTag EquipmentSlot_Weapon_Main_Secondary;
-	FGameplayTag EquipmentSlot_Weapon_SideArm;
-	FGameplayTag EquipmentSlot_Armor_Head;
-	FGameplayTag EquipmentSlot_Armor_Chest;
-	FGameplayTag EquipmentSlot_Armor_Leg;
-	FGameplayTag EquipmentSlot_Armor_Arm;
+	// Equipment Slot
+	FGameplayTag EquipmentSlot;
+	FGameplayTag EquipmentSlot_Active;
+	FGameplayTag EquipmentSlot_Passive;
+	// EquipmentSlot.Active
+	FGameplayTag EquipmentSlot_Active_Main;
+	FGameplayTag EquipmentSlot_Active_Main_Primary;
+	FGameplayTag EquipmentSlot_Active_Main_Secondary;
+	FGameplayTag EquipmentSlot_Active_Sub;
+	FGameplayTag EquipmentSlot_Active_Sub_SideArm;
+	FGameplayTag EquipmentSlot_Active_Sub_Throwing01;
+	FGameplayTag EquipmentSlot_Active_Sub_Throwing02;
+	// EquipmentSlot.Passive
+	FGameplayTag EquipmentSlot_Passive_Armor;
+	FGameplayTag EquipmentSlot_Passive_Armor_Head;
+	FGameplayTag EquipmentSlot_Passive_Armor_Chest;
+	FGameplayTag EquipmentSlot_Passive_Armor_Leg;
+	FGameplayTag EquipmentSlot_Passive_Armor_Arm;
 
-	// Item Tags
+	// Item
 	FGameplayTag Item;
 	FGameplayTag Item_Clutter;
 	FGameplayTag Item_Consumable;
-
-	// Item.Equipment Tags
 	FGameplayTag Item_Equipment;
-	FGameplayTag Item_Equipment_Weapon_Melee_Knife;
-	FGameplayTag Item_Equipment_Weapon_Ranged_Gun_Rifle;
-	FGameplayTag Item_Equipment_Weapon_Ranged_Gun_ShotGun;
-	FGameplayTag Item_Equipment_Weapon_Ranged_Gun_Pistol;
-	FGameplayTag Item_Equipment_Armor_Head;
-	FGameplayTag Item_Equipment_Armor_Chest;
-	FGameplayTag Item_Equipment_Armor_Leg;
-	FGameplayTag Item_Equipment_Armor_Arm;
+	// Item.Equipment.Active
+	FGameplayTag Item_Equipment_Active;
+	FGameplayTag Item_Equipment_Active_Weapon;
+	FGameplayTag Item_Equipment_Active_Weapon_Melee;
+	FGameplayTag Item_Equipment_Active_Weapon_Melee_Knife;
+	FGameplayTag Item_Equipment_Active_Weapon_Ranged;
+	FGameplayTag Item_Equipment_Active_Weapon_Ranged_Gun;
+	FGameplayTag Item_Equipment_Active_Weapon_Ranged_Gun_Rifle;
+	FGameplayTag Item_Equipment_Active_Weapon_Ranged_Gun_ShotGun;
+	FGameplayTag Item_Equipment_Active_Weapon_Ranged_Gun_Pistol;
+	// Item.Equipment.Passive
+	FGameplayTag Item_Equipment_Passive;
+	FGameplayTag Item_Equipment_Passive_Armor;
+	FGameplayTag Item_Equipment_Passive_Armor_Head;
+	FGameplayTag Item_Equipment_Passive_Armor_Chest;
+	FGameplayTag Item_Equipment_Passive_Armor_Leg;
+	FGameplayTag Item_Equipment_Passive_Armor_Arm;
 
 protected:
-
 	//Registers all of the tags with the GameplayTags Manager
 	void AddAllTags(UGameplayTagsManager& Manager);
 

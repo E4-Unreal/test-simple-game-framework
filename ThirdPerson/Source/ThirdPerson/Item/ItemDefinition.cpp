@@ -42,7 +42,7 @@ bool FInventoryItem::Add(int32& NewCount)
 bool FEquipmentItem::IsAddable(const UEquipmentDefinition* NewEquipment) const
 {
 	// Check Empty
-	if(!(EquipmentDefinition == nullptr && Equipment == nullptr)){ return false; }
+	if(!IsEmpty()){ return false; }
 	
 	// Check NewEquipment can be added to here
 	if(!EquipmentSlot.MatchesTag(NewEquipment->EquipmentSlotTag)){ return false; }

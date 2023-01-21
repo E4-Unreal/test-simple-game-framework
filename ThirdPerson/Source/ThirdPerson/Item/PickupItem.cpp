@@ -42,7 +42,9 @@ void APickupItem::Init()
 	Mesh->SetRelativeRotation(ItemDefinition->PickupInfo->Rotation);
 
 	// Set Sphere & Do auto scaling if default is 0 or less
-	const float AutoScaling = Mesh->GetStaticMesh()->GetBounds().GetBox().GetSize().Size();
+	float AutoScaling = Mesh->GetStaticMesh()->GetBounds().GetBox().GetSize().Size();
+	// AutoScaling Min is 100
+	if(AutoScaling < 100){ AutoScaling = 100; }
 	const float SphereRadius = ItemDefinition->PickupInfo->SphereRadius;
 	if(SphereRadius < AutoScaling)
 	{
