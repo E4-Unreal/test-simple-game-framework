@@ -13,7 +13,7 @@
 //////////////////////////////////////////////////////////////////////
 // Equipment Slots
 
-UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment Sockets", ShortTooltip = "Skeletal Mesh Socket Names for Equipment Slots"))
+UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment SlotTags", ShortTooltip = "Equipment SlotTags for Equipment Slots"))
 class THIRDPERSON_API UEquipmentSlotTags : public UDataAsset
 {
 	GENERATED_BODY()
@@ -22,6 +22,7 @@ protected:
 	// Todo C++이 아니라 에디터에서 설정할 수 있는 게임플레이 태그를 제한하는 방법은 없을까?
 	
 	// Todo 프로젝트에 설정된 GameplayTag에 따라 meta=(Categories="") 커스터마이징 필요
+	// Todo FGameplayTagContainer로 변경?
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(Categories="EquipmentSlot"))
 	TArray<FGameplayTag> All;
 
@@ -76,12 +77,19 @@ public:
 protected:
 	TArray<FEquipmentItem> EquipmentItems;
 
+	// For EquipmentState
+	friend class UEquipmentState;
+	friend class UMainState;
+	friend class USubState;
+	
+	UEquipmentState* EquipmentState;
+	UMainState* MainState;
+	USubState* SubState;
+
 	// For SelectEquipment()
 	FGameplayTag SelectableTag;
 	FGameplayTag MainTag;
 	FGameplayTag PrimarySlot;
-	FGameplayTag CurrentSlot;
-	FGameplayTag SubSlot;
 
 	// 멤버 함수
 public:
@@ -97,34 +105,15 @@ public:
 	bool SelectEquipment(const FGameplayTag SelectedSlot);
 
 protected:
-
+	// For EquipmentState
+	FORCEINLINE void SetEquipmentState(UEquipmentState* NewState) { EquipmentState = NewState; }
+	FORCEINLINE UMainState* GetMainState() const { return MainState; }
+	FORCEINLINE USubState* GetSubState() const { return SubState; }
+	
 	const FName* CheckSocket(const FGameplayTag EquipmentSlot) const;
 	AEquipment* SpawnEquipment(UEquipmentDefinition* NewEquipment) const;
 	FORCEINLINE AActor* GetEquipment(const FGameplayTag Slot){ return EquipmentItems.FindByKey(Slot)->Equipment; }
 	void MoveEquipmentToSlot(const FGameplayTag OriginSlot, const FGameplayTag DestSlot);
-	FORCEINLINE void RestoreEquipmentToSlot(const FGameplayTag EquipmentSlot){ MoveEquipmentToSlot(EquipmentSlot, EquipmentSlot); }
-	FORCEINLINE void SwapSlots(const FGameplayTag OriginSlot, const FGameplayTag DestSlot)
-	{
-		MoveEquipmentToSlot(OriginSlot, DestSlot);
-		MoveEquipmentToSlot(DestSlot, OriginSlot);
-	}
-	FORCEINLINE void SwapMainToMain(const FGameplayTag SelectedSlot)
-	{
-		if(CurrentSlot.MatchesTagExact(PrimarySlot))
-		{
-			SwapSlots(CurrentSlot, SelectedSlot);
-		}
-		else if(SelectedSlot.MatchesTagExact(PrimarySlot))
-		{
-			RestoreEquipmentToSlot(PrimarySlot);
-			RestoreEquipmentToSlot(CurrentSlot);
-		}
-		else
-		{
-			RestoreEquipmentToSlot(CurrentSlot);
-			SwapSlots(PrimarySlot, SelectedSlot);
-		}
-	}
 	bool SetActorDisabled(const bool bDisable, AActor* SpawnedActor);
 	
 	// Called when the game starts
@@ -134,4 +123,3 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 };
-

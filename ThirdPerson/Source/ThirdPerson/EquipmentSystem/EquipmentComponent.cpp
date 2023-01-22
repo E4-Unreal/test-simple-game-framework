@@ -5,6 +5,7 @@
 
 #include "EquipmentComponent.h"
 #include "Equipment.h"
+#include "EquipmentState.h"
 #include "GameFramework/Character.h"
 #include "ThirdPerson/GamePlayTags/ThirdPersonGameplayTags.h"
 
@@ -16,6 +17,7 @@ UEquipmentComponent::UEquipmentComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+	
 }
 
 void UEquipmentComponent::Init()
@@ -28,12 +30,18 @@ void UEquipmentComponent::Init()
 	SelectableTag = FThirdPersonGameplayTags::Get().EquipmentSlot_Active;
 	MainTag = FThirdPersonGameplayTags::Get().EquipmentSlot_Active_Main;
 	PrimarySlot = EquipmentSlotTags->GetPrimary();
-	CurrentSlot = PrimarySlot;
+
+	// Todo 상태가 변할 때마다 상태 객체를 새로 생성하면 코드 관리가 편리하지만, 장비 상태가 수시로 변하기 때문에 상태별로 하나의 객체만 생성하여 관리중인데 둘 다 해결할 수 있는 방법이 없을까?
+	// Equipment State 초기화
+	MainState = NewObject<UMainState>(this, UMainState::StaticClass());
+	MainState->CurrentSlot = PrimarySlot;
+	SubState = NewObject<USubState>(this, USubState::StaticClass());
+	EquipmentState = MainState;
 	
 	for(const FGameplayTag EquipmentSlot : EquipmentSlotTags->GetAll())
 	{
 		EquipmentItems.Add(FEquipmentItem(EquipmentSlot));
-		UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::Init > EquipmentItem.EquipmentSlot: %s"), *EquipmentSlot.GetTagName().ToString())
+		UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::Init > EquipmentSlot Added: %s"), *EquipmentSlot.GetTagName().ToString())
 	}
 	
 	UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::Init > EquipmentItems.Num(): %d"), EquipmentItems.Num())
@@ -54,9 +62,9 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 			
 			// EquipmentItem에 저장 후 장비를 해당 소켓에 부착
 			EquipmentItem.Add(NewEquipment, SpawnedEquipment);
-			RestoreEquipmentToSlot(EquipmentItem.EquipmentSlot);
+			MoveEquipmentToSlot(EquipmentItem.EquipmentSlot, EquipmentItem.EquipmentSlot);
 
-			if(EquipmentItems.FindByKey(CurrentSlot)->IsEmpty())
+			if(EquipmentItems.FindByKey(EquipmentState->CurrentSlot)->IsEmpty())
 			{
 				SelectEquipment(EquipmentItem.EquipmentSlot);
 			}
@@ -70,57 +78,18 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 bool UEquipmentComponent::SelectEquipment(const FGameplayTag SelectedSlot)
 {
 	// 이미 선택된 장비 슬롯이라면 무시
-	if(SelectedSlot.MatchesTagExact(CurrentSlot) && SubSlot == FGameplayTag::EmptyTag){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > Already Selected Slot")) return false; }
-	if(SelectedSlot.MatchesTagExact(SubSlot)){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > Already Selected Slot")) return false; }
+	if(SelectedSlot.MatchesTagExact(EquipmentState->CurrentSlot)){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > Already Selected Slot")) return false; }
 	
 	// 선택한 장비 슬롯이 선택 가능한 슬롯인지 확인
 	if(!SelectedSlot.MatchesTag(SelectableTag)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > EquipmentSlot should be under %s"), *SelectableTag.ToString()) return false; }
 
 	// 선택한 장비 슬롯이 존재하는지 확인
 	if(!EquipmentSlotTags->GetAll().Contains(SelectedSlot)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s is not exist in EquipmentSlots->EquipmentSlotTags"), *SelectedSlot.ToString()) return false; }
+
+	// EquipmentState에 따라 무기 스왑 처리
+	EquipmentState->SwapToSelectedEquipment(SelectedSlot);
+	return true;
 	
-	if(SubSlot == FGameplayTag::EmptyTag) // 현재 주 장비를 들고 있는 경우
-	{
-		if(SelectedSlot.MatchesTag(MainTag)) // 선택된 장비가 주 장비인 경우
-		{
-			// 현재 주 장비와 선택된 주 장비 부착 위치 교체
-			SwapMainToMain(SelectedSlot);
-			
-			CurrentSlot = SelectedSlot;
-			return true;
-		}
-		else
-		{
-			// 현재 들고 있는 주 장비 비활성화 후, 선택된 서브 장비를 PrimarySlot에 부착
-			if(AActor* Equipment = GetEquipment(CurrentSlot)){ SetActorDisabled(true, Equipment); }
-			MoveEquipmentToSlot(SelectedSlot, PrimarySlot);
-
-			SubSlot = SelectedSlot;
-			return true;
-		}
-	}
-	else // 현재 서브 장비를 들고 있는 경우
-	{
-		// 서브 장비 원위치
-		RestoreEquipmentToSlot(SubSlot);
-		
-		if(SelectedSlot.MatchesTag(MainTag)) // 선택된 장비가 주 장비인 경우
-		{
-			// 현재 들고 있는 주 장비 활성화
-			if(AActor* Equipment = GetEquipment(CurrentSlot)){ SetActorDisabled(false, Equipment); }
-			SubSlot = FGameplayTag::EmptyTag;
-			SelectEquipment(SelectedSlot);
-			return true;
-		}
-		else
-		{
-			// 새로운 서브 장비를 PrimarySlot에 부착
-			MoveEquipmentToSlot(SelectedSlot, PrimarySlot);
-
-			SubSlot = SelectedSlot;
-			return true;
-		}
-	}
 }
 
 const FName* UEquipmentComponent::CheckSocket(const FGameplayTag EquipmentSlot) const
