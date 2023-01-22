@@ -50,19 +50,28 @@ bool FEquipmentItem::IsAddable(const UEquipmentDefinition* NewEquipment) const
 	return true;
 }
 
-bool FEquipmentItem::Add(UEquipmentDefinition* NewEquipment, AActor* SpawnedActor)
+bool FEquipmentItem::Add(UEquipmentDefinition* NewEquipment)
 {
 	UE_LOG(LogEquipment, Log, TEXT("FEquipmentItem::Add > EquipmentSlot: %s"), *EquipmentSlot.GetTagName().ToString())
+	
 	// 유효성 검사
 	if(NewEquipment == nullptr) { UE_LOG(LogEquipment, Error, TEXT("FEquipmentItem::Add > NewEquipment == nullptr")) return false; }
 	UE_LOG(LogEquipment, Log, TEXT("FEquipmentItem::Add > EquipmentDefinition: %s"), *NewEquipment->GetName())
 	
-	if(SpawnedActor == nullptr) { UE_LOG(LogEquipment, Warning, TEXT("FEquipmentItem::Add > SpawnedActor == nullptr")) }
-	else { UE_LOG(LogEquipment, Log, TEXT("FEquipmentItem::Add > SpawnedActors: %s"), *SpawnedActor->GetName()) }
-	
 	EquipmentDefinition = NewEquipment;
-	Equipment = SpawnedActor;
 
 	UE_LOG(LogEquipment, Log, TEXT("FEquipmentItem::Add > Succeed"))
+	return true;
+}
+
+bool FEquipmentItem::SetEquipment(AActor* SpawnedActor)
+{
+	UE_LOG(LogEquipment, Log, TEXT("FEquipmentItem::SetEquipment > EquipmentSlot: %s"), *EquipmentSlot.GetTagName().ToString())
+	
+	// 유효성 검사
+	if(SpawnedActor == nullptr) { UE_LOG(LogEquipment, Error, TEXT("FEquipmentItem::SetEquipment > SpawnedActor == nullptr")) return false; }
+
+	UE_LOG(LogEquipment, Log, TEXT("FEquipmentItem::SetEquipment > SpawnedActor: %s"), *SpawnedActor->GetName())
+	Equipment = SpawnedActor;
 	return true;
 }

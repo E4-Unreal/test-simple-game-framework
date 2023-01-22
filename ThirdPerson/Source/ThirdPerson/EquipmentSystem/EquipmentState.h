@@ -25,8 +25,10 @@ public:
 	FGameplayTag CurrentSlot;
 	
 protected:
-	UEquipmentComponent* EquipmentComponent;
 	FGameplayTag SelectedSlot;
+
+	// Get From EquipmentComponent in Constructor
+	UEquipmentComponent* EquipmentComponent;
 
 public:
 	UEquipmentState();
@@ -36,6 +38,13 @@ public:
 	virtual void SwapToSelectedEquipment(FGameplayTag Slot);
 
 protected:
+	// EquipmentComponent 멤버 변수 사용 간소화
+	FORCEINLINE FGameplayTag GetMainTag() const { return EquipmentComponent->MainTag; }
+	FORCEINLINE FGameplayTag GetPrimarySlot() const { return EquipmentComponent->PrimarySlot; }
+	FORCEINLINE UMainState* GetMainState() const { return EquipmentComponent->GetMainState(); }
+	FORCEINLINE USubState* GetSubState() const { return EquipmentComponent->GetSubState(); }
+
+	// EquipmentComponent 멤버 함수 호출 간소화
 	FORCEINLINE void ChangeState(UEquipmentState* NewState) const { EquipmentComponent->SetEquipmentState(NewState); UE_LOG(LogEquipment, Log, TEXT("EquipmentState::ChangeState > EquipmentState Changed to %s"), *NewState->GetName()) }
 	FORCEINLINE void RestoreEquipmentToSlot(const FGameplayTag EquipmentSlot) const { EquipmentComponent->MoveEquipmentToSlot(EquipmentSlot, EquipmentSlot); }
 	FORCEINLINE void SwapSlots(const FGameplayTag OriginSlot, const FGameplayTag DestSlot) const
@@ -43,7 +52,6 @@ protected:
 		EquipmentComponent->MoveEquipmentToSlot(OriginSlot, DestSlot);
 		EquipmentComponent->MoveEquipmentToSlot(DestSlot, OriginSlot);
 	}
-	FORCEINLINE void SetEquipmentDisabled(bool bDisable, FGameplayTag EquipmentSlot) const { if(AActor* Equipment = EquipmentComponent->GetEquipment(EquipmentSlot)){ EquipmentComponent->SetActorDisabled(bDisable, Equipment); } }
 };
 
 //////////////////////////////////////////////////////////////////////

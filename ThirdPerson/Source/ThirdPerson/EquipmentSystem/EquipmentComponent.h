@@ -109,12 +109,15 @@ protected:
 	FORCEINLINE void SetEquipmentState(UEquipmentState* NewState) { EquipmentState = NewState; }
 	FORCEINLINE UMainState* GetMainState() const { return MainState; }
 	FORCEINLINE USubState* GetSubState() const { return SubState; }
-	
+
+	// Function with EquipmentSlot
 	const FName* CheckSocket(const FGameplayTag EquipmentSlot) const;
-	AEquipment* SpawnEquipment(UEquipmentDefinition* NewEquipment) const;
-	FORCEINLINE AActor* GetEquipment(const FGameplayTag Slot){ return EquipmentItems.FindByKey(Slot)->Equipment; }
+	bool SpawnEquipment(const FGameplayTag EquipmentSlot);
+	FORCEINLINE FEquipmentItem* GetEquipmentItem(const FGameplayTag Slot){ return EquipmentItems.FindByKey(Slot); }
+	FORCEINLINE UEquipmentDefinition* GetEquipmentDefinition(const FGameplayTag Slot){ return GetEquipmentItem(Slot)->EquipmentDefinition; }
+	FORCEINLINE AActor* GetEquipment(const FGameplayTag Slot){ return GetEquipmentItem(Slot)->Equipment; }
 	void MoveEquipmentToSlot(const FGameplayTag OriginSlot, const FGameplayTag DestSlot);
-	bool SetActorDisabled(const bool bDisable, AActor* SpawnedActor);
+	bool SetEquipmentDisabled(const bool bDisable, const FGameplayTag EquipmentSlot);
 	
 	// Called when the game starts
 	virtual void BeginPlay() override;

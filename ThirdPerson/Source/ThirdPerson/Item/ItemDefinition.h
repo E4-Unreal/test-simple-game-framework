@@ -172,7 +172,8 @@ public:
 	FORCEINLINE bool IsSpawned() const { return Equipment != nullptr; }
 	
 	bool IsAddable(const UEquipmentDefinition* NewEquipment) const;
-	bool Add(UEquipmentDefinition* NewEquipment, AActor* SpawnedActor);
+	bool Add(UEquipmentDefinition* NewEquipment);
+	bool SetEquipment(AActor* SpawnedActor);
 
 	//Todo EquipmentComponent에 통합시키는 방법도 있을 것 같다
 	FORCEINLINE AActor* RemoveEquipment()
