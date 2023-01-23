@@ -25,6 +25,7 @@ class THIRDPERSON_API UPickupInfo : public UDataAsset
 {
 	GENERATED_BODY()
 
+	// 멤버 변수
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMesh* DisplayMesh;
@@ -38,6 +39,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float SphereRadius;
 
+	// 멤버 함수
+public:
+	FORCEINLINE bool CheckDisplayMesh() const
+	{
+		if(!IsValid(DisplayMesh)){ UE_LOG(LogItem, Warning, TEXT("%s::CheckDisplayMesh > DisplayMesh is not valid"), *this->GetName()) return false; }
+		return true;
+	}
+	
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -48,6 +57,7 @@ class THIRDPERSON_API UItemDefinition : public UDataAsset
 {
 	GENERATED_BODY()
 
+	// 멤버 변수
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName Name;
@@ -71,7 +81,19 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UPickupInfo* PickupInfo;
-	
+
+	// 멤버 함수
+public:
+	FORCEINLINE bool CheckThumbnail() const
+	{
+		if(!IsValid(Thumbnail)){ UE_LOG(LogItem, Warning, TEXT("%s::CheckThumbnail > Thumbnail is not valid"), *this->GetName()) return false; }
+		return true;
+	}
+	FORCEINLINE bool CheckPickupInfo() const
+	{
+		if(!IsValid(PickupInfo)){ UE_LOG(LogItem, Warning, TEXT("%s::CheckPickupInfo > PickupInfo is not valid"), *this->GetName()) return false; }
+		return true;
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -174,6 +196,7 @@ public:
 	bool IsAddable(const UEquipmentDefinition* NewEquipment) const;
 	bool Add(UEquipmentDefinition* NewEquipment);
 	bool SetEquipment(AActor* SpawnedActor);
+	void Clear(){ EquipmentDefinition = nullptr; Equipment = nullptr; }
 
 	//Todo EquipmentComponent에 통합시키는 방법도 있을 것 같다
 	FORCEINLINE AActor* RemoveEquipment()

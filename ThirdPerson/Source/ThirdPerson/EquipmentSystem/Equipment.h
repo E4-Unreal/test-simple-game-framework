@@ -28,8 +28,8 @@ public:
 	// Sets default values for this actor's properties
 	AEquipment();
 
-	// 초기화
-	void Init();
+	// EquipmentDefinition을 읽어들여 해당 장비로 변환
+	void ApplyEquipmentDefinition() const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -38,4 +38,10 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	// 에디터에서 설정을 변경하는 경우
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+	// SpawnActor 혹은 에디터에서 생성하는 경우
+	virtual void PostInitializeComponents() override;
 };

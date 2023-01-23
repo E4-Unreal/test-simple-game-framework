@@ -7,7 +7,7 @@
 // Equipment State
 UEquipmentState::UEquipmentState()
 {
-	if(GetOuter() == nullptr){ UE_LOG(LogEquipment, Fatal, TEXT("UEquipmentState::UEquipmentState() > You must use NewObject<UEquipmentState>(Outer)")) }
+	if(!IsValid(GetOuter())){ UE_LOG(LogEquipment, Fatal, TEXT("UEquipmentState::UEquipmentState() > You must use NewObject<UEquipmentState>(Outer)")) }
 	EquipmentComponent = Cast<UEquipmentComponent>(GetOuter());
 }
 
@@ -58,7 +58,14 @@ void UMainState::SwapToSubEquipment()
 	GetSubState()->CurrentSlot = SelectedSlot;
 
 	// SubState로 상태 변경
-	ChangeState(GetSubState());
+	if(IsValid(GetSubState()))
+	{
+		ChangeState(GetSubState());
+	}
+	else
+	{
+		UE_LOG(LogEquipment, Error, TEXT("SubState is not valid"))
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -70,7 +77,14 @@ void USubState::SwapToMainEquipment()
 
 	// Todo 플레이어 설정에 따라 원래 들고 있던 주 장비로만 교체되도록 설정할 수 있는 기능 만들어도 좋을듯
 	// 원래 들고 있던 주 장비가 아닌 선택한 주 장비로 교체
-	GetMainState()->SwapToSelectedEquipment(SelectedSlot);
+	if(IsValid(GetMainState()))
+	{
+		GetMainState()->SwapToSelectedEquipment(SelectedSlot);
+	}
+	else
+	{
+		UE_LOG(LogEquipment, Error, TEXT("MainState is not valid"))
+	}
 }
 
 void USubState::SwapToSubEquipment()

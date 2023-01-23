@@ -20,16 +20,16 @@ class THIRDPERSON_API UCharacterInfo : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CharacterInfo | SkeletalMesh")
 	USkeletalMesh* SkeletalMeshAsset;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Transform|Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CharacterInfo | Transform | Mesh")
 	FVector Location;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Transform|Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CharacterInfo | Transform | Mesh")
 	FRotator Rotator;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Animation|Blueprint")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CharacterInfo | Animation | Blueprint")
 	TSubclassOf<UAnimInstance> AnimClass;
 
 };

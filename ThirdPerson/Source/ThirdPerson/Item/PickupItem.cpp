@@ -25,48 +25,47 @@ APickupItem::APickupItem()
 	Mesh->SetupAttachment(Sphere);
 }
 
-void APickupItem::Init()
+void APickupItem::ApplyItemDefinition()
 {
-	// ItemDefinition 유효성 검사 실패 시 액터 파괴
-	if(ItemDefinition == nullptr)
+	UStaticMesh* StaticMesh = nullptr;
+	FVector RelativeLocation = FVector(0,0,0);
+	FRotator RelativeRotator = FRotator(0,0,0);
+	const FVector RelativeScale = FVector(1,1,1);
+	float AutoScaling = 0;
+	float SphereRadius = 0;
+	
+	// Apply ItemDefinition
+	if(ItemDefinition)
 	{
-		UE_LOG(LogTemp, Error, TEXT("PickupItem::Init > ItemDefinition is null. Execute self-destroy"))
-		this->Destroy();
-		return;
+		// Set Count
+		if(bDefaultCount){ ItemCount = ItemDefinition->SpawnCount; }
+		if(ItemDefinition->CheckPickupInfo())
+		{
+			// Set Mesh
+			StaticMesh = ItemDefinition->PickupInfo->DisplayMesh;
+			RelativeLocation = ItemDefinition->PickupInfo->Location;
+			RelativeRotator = ItemDefinition->PickupInfo->Rotation;
+
+			// Set Sphere
+			SphereRadius = ItemDefinition->PickupInfo->SphereRadius;
+			AutoScaling = (StaticMesh->GetBoundingBox().GetSize() * RelativeScale).Size();
+		}
 	}
-	if(ItemDefinition->PickupInfo == nullptr){ UE_LOG(LogTemp, Warning, TEXT("PickupItem::Init > ItemDefinition->PickupInfo is null")) return; }
 
-	// Set Mesh & Destroy if it failed
-	if(!Mesh->SetStaticMesh(ItemDefinition->PickupInfo->DisplayMesh)){ this->Destroy(); return; }
-	Mesh->SetRelativeLocation(ItemDefinition->PickupInfo->Location);
-	Mesh->SetRelativeRotation(ItemDefinition->PickupInfo->Rotation);
-
-	// Set Sphere & Do auto scaling if default is 0 or less
-	float AutoScaling = Mesh->GetStaticMesh()->GetBounds().GetBox().GetSize().Size();
-	// AutoScaling Min is 100
-	if(AutoScaling < 100){ AutoScaling = 100; }
-	const float SphereRadius = ItemDefinition->PickupInfo->SphereRadius;
+	// Apply Mesh
+	Mesh->SetStaticMesh(StaticMesh);
+	Mesh->SetRelativeTransform(FTransform(RelativeRotator, RelativeLocation, RelativeScale));
+		
+	// Apply Sphere
+	if(AutoScaling < DefaultRadius){ AutoScaling = DefaultRadius; }
 	if(SphereRadius < AutoScaling)
 	{
 		Sphere->SetSphereRadius(AutoScaling);
-		UE_LOG(LogTemp, Warning, TEXT("PickupItem::Init\nAuto scaling SphereRadius: %f"), AutoScaling);
+		UE_LOG(LogTemp, Warning, TEXT("APickupItem::ApplyItemDefinition > Auto Scaling %s: %f"), *Mesh->GetStaticMesh().GetName(), AutoScaling);
 	}
 	else
 	{
 		Sphere->SetSphereRadius(SphereRadius);
-	}
-
-	// Set Count
-	if(bDefaultCount)
-	{
-		ItemCount = ItemDefinition->SpawnCount;
-	}
-	else
-	{
-		if(ItemCount <= 0)
-		{
-			this->Destroy();
-		}
 	}
 
 }
@@ -111,15 +110,12 @@ void APickupItem::AddItemToEquipment(const AActor* EquipmentOwner)
 
 void APickupItem::Update()
 {
-	if(ItemCount == 0)
+	if(ItemCount <= 0)
 	{
+		UE_LOG(LogItem, Log, TEXT("%s::Update > ItemCount <= 0. Execute self-destroy"), *this->GetName())
 		this->Destroy();
 	}
-	else if(ItemCount < 0)
-	{
-		UE_LOG(LogInventory, Error, TEXT("PickupItem :: ItemCount < 0"));
-		this->Destroy();
-	}
+	
 }
 
 void APickupItem::Interact_Implementation(const AActor* Interactor)
@@ -147,13 +143,31 @@ void APickupItem::Interact_Implementation(const AActor* Interactor)
 void APickupItem::BeginPlay()
 {
 	Super::BeginPlay();
-	Init();
+	
+	// ItemDefinition 설정이 안 되어있다면 액터 파괴
+	if(!IsValid(ItemDefinition)){ UE_LOG(LogItem, Error, TEXT("%s > ItemDefinition is not valid. Execute self-destroy"), *this->GetName()) }
+
+	// ItemCount <= 0 이면 액터 파괴
+	Update();
 }
 
 // Called every frame
 void APickupItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+// 에디터에서 설정을 변경하는 경우
+void APickupItem::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	ApplyItemDefinition();
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
+// SpawnActor 혹은 에디터에서 생성하는 경우
+void APickupItem::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	ApplyItemDefinition();
 }
 

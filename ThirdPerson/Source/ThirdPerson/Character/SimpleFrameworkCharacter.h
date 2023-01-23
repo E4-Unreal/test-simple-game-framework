@@ -37,11 +37,20 @@ public:
 	int32 InventorySlots = 0;
 
 protected:
-	void Init();
-	void ApplyCharacterInfo();
+	void Init() const;
+	
+	// CharacterInfo를 읽어들여 해당 캐릭터로 변환
+	void ApplyCharacterInfo() const;
+	
 	/** Called for movement input */
 	void Interact();
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
+
+	// 에디터에서 설정을 변경하는 경우
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+	// SpawnActor 혹은 에디터에서 생성하는 경우
+	virtual void PostInitializeComponents() override;
 };

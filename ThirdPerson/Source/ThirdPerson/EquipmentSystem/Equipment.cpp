@@ -19,7 +19,8 @@ AEquipment::AEquipment()
 	RootComponent = SkeletalMesh;
 }
 
-void AEquipment::Init()
+// EquipmentDefinition을 읽어들여 해당 장비로 변환
+void AEquipment::ApplyEquipmentDefinition() const
 {
 	// 유효성 검사
 	if(EquipmentDefinition == nullptr) { UE_LOG(LogEquipment, Warning, TEXT("PickupItem::Init > EquipmentDefinition == nullptr")) return; }
@@ -32,12 +33,25 @@ void AEquipment::Init()
 void AEquipment::BeginPlay()
 {
 	Super::BeginPlay();
-	Init();
 }
 
 // Called every frame
 void AEquipment::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+// 에디터에서 설정을 변경하는 경우
+void AEquipment::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	ApplyEquipmentDefinition();
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
+// SpawnActor 혹은 에디터에서 생성하는 경우
+void AEquipment::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	ApplyEquipmentDefinition();
 }
 

@@ -28,6 +28,7 @@ protected:
 	FGameplayTag SelectedSlot;
 
 	// Get From EquipmentComponent in Constructor
+	UPROPERTY()
 	UEquipmentComponent* EquipmentComponent;
 
 public:

@@ -31,8 +31,10 @@ public:
 	FGameplayTag EquipmentSlot_Active_Main_Secondary;
 	FGameplayTag EquipmentSlot_Active_Sub;
 	FGameplayTag EquipmentSlot_Active_Sub_SideArm;
-	FGameplayTag EquipmentSlot_Active_Sub_Throwing01;
-	FGameplayTag EquipmentSlot_Active_Sub_Throwing02;
+	FGameplayTag EquipmentSlot_Active_Sub_SideArm_Primary;
+	FGameplayTag EquipmentSlot_Active_Sub_Throwing;
+	FGameplayTag EquipmentSlot_Active_Sub_Throwing_Primary;
+	FGameplayTag EquipmentSlot_Active_Sub_Throwing_Secondary;
 	// EquipmentSlot.Passive
 	FGameplayTag EquipmentSlot_Passive_Armor;
 	FGameplayTag EquipmentSlot_Passive_Armor_Head;

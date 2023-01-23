@@ -23,8 +23,8 @@ UEquipmentComponent::UEquipmentComponent()
 void UEquipmentComponent::Init()
 {
 	// EquipmentSlotTags, EquipmentSockets 유효성 검사
-	if(EquipmentSlotTags == nullptr){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::Init > EquipmentSlotTags is not found")) return; }
-	if(EquipmentSockets == nullptr){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::Init > EquipmentSockets is not found")) return; }
+	if(!IsValid(EquipmentSlotTags)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::Init > EquipmentSlotTags is not valid")) return; }
+	if(!IsValid(EquipmentSockets)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::Init > EquipmentSockets is not valid")) return; }
 	
 	// 장비 슬롯(GameplayTag) 설정
 	SelectableTag = FThirdPersonGameplayTags::Get().EquipmentSlot_Active;
@@ -54,7 +54,7 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 		if(EquipmentItem.IsAddable(NewEquipment))
 		{
 			// 유효성 검사
-			if(NewEquipment == nullptr) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::AddEquipment > NewEquipment == nullptr")) return false; }
+			if(!IsValid(NewEquipment)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::AddEquipment > NewEquipment is not valid")) return false; }
 
 			// EquipmentItem에 EquipmentDefinition 저장
 			EquipmentItem.Add(NewEquipment);
@@ -67,6 +67,10 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 
 			// 현재 들고 있는 장비가 없다면, 습득한 장비를 선택
 			if(EquipmentItems.FindByKey(EquipmentState->CurrentSlot)->IsEmpty()){ SelectEquipment(EquipmentItem.EquipmentSlot); }
+
+			// 이벤트 디스패처 호출
+			OnUpdate.Broadcast();
+			
 			return true;
 		}
 	}
@@ -76,31 +80,73 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 
 bool UEquipmentComponent::SelectEquipment(const FGameplayTag SelectedSlot)
 {
+	if(!IsValid(EquipmentState)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > EquipmentState is not valid")) return false;}
+	
 	// 이미 선택된 장비 슬롯이라면 무시
 	if(SelectedSlot.MatchesTagExact(EquipmentState->CurrentSlot)){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > Already Selected Slot")) return false; }
 	
 	// 선택한 장비 슬롯이 선택 가능한 슬롯인지 확인
-	if(!SelectedSlot.MatchesTag(SelectableTag)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > EquipmentSlot should be under %s"), *SelectableTag.ToString()) return false; }
+	if(!SelectedSlot.MatchesTag(SelectableTag)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s should be under %s"), *SelectedSlot.ToString(), *SelectableTag.ToString()) return false; }
 
 	// 선택한 장비 슬롯이 존재하는지 확인
-	if(!EquipmentSlotTags->GetAll().Contains(SelectedSlot)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s is not exist in EquipmentSlots->EquipmentSlotTags"), *SelectedSlot.ToString()) return false; }
+	if(!EquipmentSlotTags->GetAll().Contains(SelectedSlot)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s is not exist in %s::All"), *SelectedSlot.ToString(), *EquipmentSlotTags->GetName()) return false; }
 
 	// 무기 위치 스왑
 	EquipmentState->SwapToSelectedEquipment(SelectedSlot);
 
 	// Todo 선택된 장비와 플레이어의 입력 액션 바인딩
 	// Binding Equipment with SelectedSlot....
+
+	// 이벤트 디스패처 호출
+	//OnEquipmentSwapped.Broadcast();
 	
 	return true;
 	
 }
 
+bool UEquipmentComponent::SwapEquipmentsBySlot(FGameplayTag OriginSlot, FGameplayTag DestSlot)
+{
+	// 스왑 가능한 슬롯인지 확인
+	UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SwapEquipmentsBySlot > %s to %s"),*OriginSlot.ToString(), *DestSlot.ToString())
+	if(OriginSlot.RequestDirectParent() != DestSlot.RequestDirectParent()){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SwapEquipmentsBySlot > Not Same Category")) return false; }
+
+	// 장비 슬롯 스왑
+	FEquipmentItem* OriginEquipmentItem = GetEquipmentItem(OriginSlot);
+	FEquipmentItem* DestEquipmentItem = GetEquipmentItem(DestSlot);
+	
+	const FEquipmentItem Tem = *OriginEquipmentItem;
+	OriginEquipmentItem->Clear();
+	OriginEquipmentItem->Add(DestEquipmentItem->EquipmentDefinition);
+	OriginEquipmentItem->SetEquipment(DestEquipmentItem->Equipment);
+
+	DestEquipmentItem->Clear();
+	DestEquipmentItem->Add(Tem.EquipmentDefinition);
+	DestEquipmentItem->SetEquipment(Tem.Equipment);
+
+	// 장비 부착 위치 업데이트
+	if(EquipmentState->CurrentSlot == OriginSlot)
+	{
+		SelectEquipment(DestSlot);
+	}
+	else if(EquipmentState->CurrentSlot == DestSlot)
+	{
+		SelectEquipment(OriginSlot);
+	}
+	else
+	{
+		MoveEquipmentToSlot(OriginSlot, OriginSlot);
+		MoveEquipmentToSlot(DestSlot, DestSlot);
+	}
+	
+	return true;
+}
+
 const FName* UEquipmentComponent::CheckSocket(const FGameplayTag EquipmentSlot) const
 {
 	// 유효성 검사
-	if(EquipmentSockets == nullptr) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::CheckSocket > EquipmentSockets not found")) return nullptr; }
+	if(!IsValid(EquipmentSockets)) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::CheckSocket > EquipmentSockets not found")) return nullptr; }
 	const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-	if(OwnerCharacter == nullptr){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::CheckSocket > OwnerCharacter not found")) return nullptr; }
+	if(!IsValid(OwnerCharacter)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::CheckSocket > OwnerCharacter not found")) return nullptr; }
 
 	// EquipmentSlot에 대응하는 소켓 확인
 	const FName* SocketName = EquipmentSockets->GetSocketMappings().Find(EquipmentSlot);
@@ -120,11 +166,11 @@ bool UEquipmentComponent::SpawnEquipment(const FGameplayTag EquipmentSlot)
 {
 	// 유효성 검사
 	UEquipmentDefinition* EquipmentDefinition = GetEquipmentDefinition(EquipmentSlot);
-	if(EquipmentDefinition == nullptr) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SpawnEquipment > %s has no EquipmentDefinition"), *EquipmentSlot.ToString()) return false; }
+	if(!IsValid(EquipmentDefinition)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SpawnEquipment > %s has no EquipmentDefinition"), *EquipmentSlot.ToString()) return false; }
 
 	// 장비 스폰
 	UWorld* World = GetWorld();
-	if(World == nullptr) { return false; }
+	if(!IsValid(World)) { return false; }
 	const FTransform SpawnLocAndRotation;
 	if(AEquipment* SpawnedEquipment = World->SpawnActorDeferred<AEquipment>(EquipmentDefinition->ClassToSpawn, SpawnLocAndRotation))
 	{
@@ -143,7 +189,7 @@ void UEquipmentComponent::MoveEquipmentToSlot(const FGameplayTag OriginSlot, con
 {
 	// 이동시킬 장비 확인
 	AActor* Equipment = GetEquipment(OriginSlot);
-	if(Equipment == nullptr){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::MoveEquipmentToSlot > No Equipment in %s"), *OriginSlot.ToString()) return; }
+	if(!IsValid(Equipment)){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::MoveEquipmentToSlot > No Equipment in %s"), *OriginSlot.ToString()) return; }
 
 	// 이동할 소켓 이름 확인
 	if(const FName* SocketName = CheckSocket(DestSlot))
@@ -166,7 +212,7 @@ bool UEquipmentComponent::SetEquipmentDisabled(const bool bDisable, const FGamep
 {
 	// 유효성 검사
 	AActor* SpawnedActor = GetEquipment(EquipmentSlot);
-	if(SpawnedActor == nullptr){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SetActorDisabled > SpawnedActor == nullptr")) return false; }
+	if(!IsValid(SpawnedActor)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SetActorDisabled > SpawnedActor is not valid")) return false; }
 
 	// 이미 비활성화된 장비를 비활성화 하지는 않는다
 	if(SpawnedActor->IsHidden() && bDisable){ return false; }

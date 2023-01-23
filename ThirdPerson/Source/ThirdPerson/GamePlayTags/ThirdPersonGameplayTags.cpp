@@ -33,8 +33,10 @@ void FThirdPersonGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 	ADD_TAG(EquipmentSlot_Active_Main_Secondary, "Secondary EquipmentSlot for Main Active Equipment");
 	ADD_TAG(EquipmentSlot_Active_Sub, "EquipmentSlot for Sub Active Equipment");
 	ADD_TAG(EquipmentSlot_Active_Sub_SideArm, "EquipmentSlot for SideArm");
-	ADD_TAG(EquipmentSlot_Active_Sub_Throwing01, "First EquipmentSlot for Throwing");
-	ADD_TAG(EquipmentSlot_Active_Sub_Throwing02, "Second EquipmentSlot for Throwing");
+	ADD_TAG(EquipmentSlot_Active_Sub_SideArm_Primary, "Priamry EquipmentSlot for SideArm");
+	ADD_TAG(EquipmentSlot_Active_Sub_Throwing, "EquipmentSlot for Throwing");
+	ADD_TAG(EquipmentSlot_Active_Sub_Throwing_Primary, "Primary EquipmentSlot for Throwing");
+	ADD_TAG(EquipmentSlot_Active_Sub_Throwing_Secondary, "Secondary EquipmentSlot for Throwing");
 	// EquipmentSlot.Passive
 	ADD_TAG(EquipmentSlot_Passive_Armor, "EquipmentSlot for Armor");
 	ADD_TAG(EquipmentSlot_Passive_Armor_Head, "EquipmentSlot for Head Armor");
