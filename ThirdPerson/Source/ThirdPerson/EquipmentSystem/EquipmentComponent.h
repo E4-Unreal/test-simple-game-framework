@@ -93,6 +93,7 @@ protected:
 	USubState* SubState;
 
 	// For SelectEquipment()
+	// Todo static으로 만들거나 이것도 설정 가능하도록 만들 예정
 	FGameplayTag SelectableTag;
 	FGameplayTag MainTag;
 	FGameplayTag PrimarySlot;
@@ -104,27 +105,30 @@ public:
 
 	void Init();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent")
 	bool AddEquipment(UEquipmentDefinition* NewEquipment);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent")
 	bool SelectEquipment(const FGameplayTag SelectedSlot);
 
 	// For UI
-	UFUNCTION(BlueprintPure, Category = "UI")
+	UFUNCTION(BlueprintPure, Category = "EquipmentComponent | UI")
 	TArray<FEquipmentItem> GetEquipmentItems() const { return EquipmentItems; }
 	
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent | UI")
 	bool RemoveEquipmentBySlot(FGameplayTag EquipmentSlot){ GetEquipment(EquipmentSlot)->Destroy(); GetEquipmentItem(EquipmentSlot)->Clear(); return true;}
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent | UI")
 	bool SwapEquipmentsBySlot(FGameplayTag OriginSlot, FGameplayTag DestSlot);
 	
 	// 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "UI")
-	FEquipmentDelegate OnUpdate;
-
-	UPROPERTY(BlueprintAssignable, Category = "UI")
+	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent | EvenetDispatcher")
+	FEquipmentDelegate OnEquipmentAdded;
+	
+	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent | EvenetDispatcher")
+	FEquipmentDelegate OnEquipmentSelected;
+	
+	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent | EvenetDispatcher")
 	FEquipmentDelegate OnEquipmentSwapped;
 
 protected:
@@ -148,4 +152,7 @@ protected:
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	// EquipmentComponent에서 사용하는 데이터 애셋들의 로딩이 완료된 후 초기화 진행
+	virtual void PostLoad() override;
 };

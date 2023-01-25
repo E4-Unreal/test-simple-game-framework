@@ -34,9 +34,9 @@ void UEquipmentComponent::Init()
 	// Todo 상태가 변할 때마다 상태 객체를 새로 생성하면 코드 관리가 편리하지만, 장비 상태가 수시로 변하기 때문에 상태별로 하나의 객체만 생성하여 관리중인데 둘 다 해결할 수 있는 방법이 없을까?
 	// Equipment State 초기화
 	MainState = NewObject<UMainState>(this, UMainState::StaticClass());
-	MainState->CurrentSlot = PrimarySlot;
 	SubState = NewObject<USubState>(this, USubState::StaticClass());
 	EquipmentState = MainState;
+	EquipmentState->SetCurrentSlot(PrimarySlot);
 	
 	for(const FGameplayTag EquipmentSlot : EquipmentSlotTags->GetAll())
 	{
@@ -66,10 +66,10 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 			MoveEquipmentToSlot(EquipmentItem.EquipmentSlot, EquipmentItem.EquipmentSlot);
 
 			// 현재 들고 있는 장비가 없다면, 습득한 장비를 선택
-			if(EquipmentItems.FindByKey(EquipmentState->CurrentSlot)->IsEmpty()){ SelectEquipment(EquipmentItem.EquipmentSlot); }
+			if(EquipmentItems.FindByKey(EquipmentState->GetCurrentSlot())->IsEmpty()){ SelectEquipment(EquipmentItem.EquipmentSlot); }
 
 			// 이벤트 디스패처 호출
-			OnUpdate.Broadcast();
+			OnEquipmentAdded.Broadcast();
 			
 			return true;
 		}
@@ -83,7 +83,7 @@ bool UEquipmentComponent::SelectEquipment(const FGameplayTag SelectedSlot)
 	if(!IsValid(EquipmentState)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > EquipmentState is not valid")) return false;}
 	
 	// 이미 선택된 장비 슬롯이라면 무시
-	if(SelectedSlot.MatchesTagExact(EquipmentState->CurrentSlot)){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > Already Selected Slot")) return false; }
+	if(SelectedSlot.MatchesTagExact(EquipmentState->GetCurrentSlot())){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > Already Selected Slot")) return false; }
 	
 	// 선택한 장비 슬롯이 선택 가능한 슬롯인지 확인
 	if(!SelectedSlot.MatchesTag(SelectableTag)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s should be under %s"), *SelectedSlot.ToString(), *SelectableTag.ToString()) return false; }
@@ -98,7 +98,7 @@ bool UEquipmentComponent::SelectEquipment(const FGameplayTag SelectedSlot)
 	// Binding Equipment with SelectedSlot....
 
 	// 이벤트 디스패처 호출
-	//OnEquipmentSwapped.Broadcast();
+	OnEquipmentSelected.Broadcast();
 	
 	return true;
 	
@@ -124,19 +124,31 @@ bool UEquipmentComponent::SwapEquipmentsBySlot(FGameplayTag OriginSlot, FGamepla
 	DestEquipmentItem->SetEquipment(Tem.Equipment);
 
 	// 장비 부착 위치 업데이트
-	if(EquipmentState->CurrentSlot == OriginSlot)
+	// 현재 선택된 장비가 포함된 경우, CurrentSlot만 변경하여 현재 선택된 장비가 변경되지 않도록 한다
+	if(EquipmentState->GetCurrentSlot() == OriginSlot)
 	{
-		SelectEquipment(DestSlot);
+		EquipmentState->SetCurrentSlot(DestSlot);
 	}
-	else if(EquipmentState->CurrentSlot == DestSlot)
+	else if(EquipmentState->GetCurrentSlot() == DestSlot)
 	{
-		SelectEquipment(OriginSlot);
+		EquipmentState->SetCurrentSlot(OriginSlot);
 	}
 	else
 	{
+		// 스왑된 장비 슬롯에 맞게 무기 부착 위치 업데이트
 		MoveEquipmentToSlot(OriginSlot, OriginSlot);
 		MoveEquipmentToSlot(DestSlot, DestSlot);
+
+		// Todo Refactoring
+		// 만약 현재 선택된 장비가 주 장비가 아니라면 PrimarySlot의 주 장비 비활성화
+		if(!EquipmentState->GetCurrentSlot().MatchesTag(MainTag))
+		{
+			SetEquipmentDisabled(true, PrimarySlot);
+		}
 	}
+
+	// 이벤트 디스패처 호출
+	OnEquipmentSwapped.Broadcast();
 	
 	return true;
 }
@@ -234,7 +246,6 @@ void UEquipmentComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	// ...
-	Init();
 }
 
 
@@ -244,5 +255,12 @@ void UEquipmentComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+// EquipmentComponent에서 사용하는 데이터 애셋들의 로딩이 완료된 후 초기화 진행
+void UEquipmentComponent::PostLoad()
+{
+	Super::PostLoad();
+	Init();
 }
 

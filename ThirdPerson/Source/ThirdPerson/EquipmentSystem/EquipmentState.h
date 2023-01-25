@@ -21,10 +21,9 @@ UCLASS(Abstract)
 class THIRDPERSON_API UEquipmentState : public UObject
 {
 	GENERATED_BODY()
-public:
-	FGameplayTag CurrentSlot;
 	
 protected:
+	FGameplayTag CurrentSlot;
 	FGameplayTag SelectedSlot;
 
 	// Get From EquipmentComponent in Constructor
@@ -37,6 +36,8 @@ public:
 	virtual void SwapToMainEquipment() {}
 	virtual void SwapToSubEquipment() {}
 	virtual void SwapToSelectedEquipment(FGameplayTag Slot);
+	FORCEINLINE FGameplayTag GetCurrentSlot() const { return CurrentSlot; }
+	FORCEINLINE void SetCurrentSlot(FGameplayTag Slot) { CurrentSlot = Slot; }
 
 protected:
 	// EquipmentComponent 멤버 변수 사용 간소화

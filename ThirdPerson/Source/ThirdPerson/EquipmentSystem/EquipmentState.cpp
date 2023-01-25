@@ -55,7 +55,7 @@ void UMainState::SwapToSubEquipment()
 	EquipmentComponent->MoveEquipmentToSlot(SelectedSlot, GetPrimarySlot());
 
 	// 선택된 장비 슬롯으로 SubState의 CurrentSlot 변경
-	GetSubState()->CurrentSlot = SelectedSlot;
+	GetSubState()->SetCurrentSlot(SelectedSlot);
 
 	// SubState로 상태 변경
 	if(IsValid(GetSubState()))
@@ -105,8 +105,7 @@ void USubState::SwapToSelectedEquipment(FGameplayTag Slot)
 void USubState::ReturnToMainState()
 {
 	// 원래 들고 있던 주 장비 활성화
-	EquipmentComponent->SetEquipmentDisabled(false, GetMainState()->CurrentSlot);
-	CurrentSlot = FGameplayTag::EmptyTag;
+	EquipmentComponent->SetEquipmentDisabled(false, GetMainState()->GetCurrentSlot());
 	
 	// MainState로 상태 변경
 	ChangeState(GetMainState());
