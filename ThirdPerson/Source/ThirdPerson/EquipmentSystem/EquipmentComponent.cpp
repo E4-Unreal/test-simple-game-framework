@@ -5,6 +5,7 @@
 
 #include "EquipmentComponent.h"
 #include "Equipment.h"
+#include "EquipmentSockets.h"
 #include "EquipmentState.h"
 #include "GameFramework/Character.h"
 #include "ThirdPerson/GamePlayTags/ThirdPersonGameplayTags.h"

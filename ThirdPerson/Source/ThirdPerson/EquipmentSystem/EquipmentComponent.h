@@ -36,29 +36,10 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
-// Equipment Sockets
-
-UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment Sockets", ShortTooltip = "Skeletal Mesh Socket Names for Equipment Slots"))
-class THIRDPERSON_API UEquipmentSockets : public UDataAsset
-{
-	GENERATED_BODY()
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	USkeletalMesh* SkeletalMeshAsset;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="EquipmentSlot"))
-	TMap<FGameplayTag, FName> SocketMappings;
-	
-public:
-	FORCEINLINE USkeletalMesh* GetSkeletalMeshAsset() const { return SkeletalMeshAsset; }
-	FORCEINLINE TMap<FGameplayTag, FName> GetSocketMappings() const { return SocketMappings; }
-};
-
-//////////////////////////////////////////////////////////////////////
 // Equipment Component
 
 class AEquipment;
+class UEquipmentSockets;
 
 // 이벤트 디스패처 매크로
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEquipmentDelegate);
