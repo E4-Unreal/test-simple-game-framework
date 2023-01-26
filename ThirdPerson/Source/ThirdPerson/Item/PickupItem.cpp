@@ -5,11 +5,11 @@
 #include "PickupItem.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
+#include "ItemDefinition.h"
 #include "ThirdPerson/ThirdPerson.h"
 #include "ThirdPerson/GamePlayTags/ThirdPersonGameplayTags.h"
-#include "ItemDefinition.h"
 #include "ThirdPerson/InventorySystem/InventoryComponent.h"
-#include "ThirdPerson/EquipmentSystem/EquipmentComponent.h"
+#include "ThirdPerson/EquipmentSystem/Component/EquipmentComponent.h"
 
 // Sets default values
 APickupItem::APickupItem()

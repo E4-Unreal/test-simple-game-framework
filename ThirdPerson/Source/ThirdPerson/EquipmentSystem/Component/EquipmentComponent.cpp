@@ -4,10 +4,12 @@
 
 
 #include "EquipmentComponent.h"
-#include "Equipment.h"
+#include "EquipmentSlots.h"
 #include "EquipmentSockets.h"
 #include "EquipmentState.h"
 #include "GameFramework/Character.h"
+#include "ThirdPerson/EquipmentSystem/Item/Equipment.h"
+#include "ThirdPerson/EquipmentSystem/Item/EquipmentItem.h"
 #include "ThirdPerson/GamePlayTags/ThirdPersonGameplayTags.h"
 
 // Sets default values for this component's properties
@@ -18,19 +20,20 @@ UEquipmentComponent::UEquipmentComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+
 	
 }
 
 void UEquipmentComponent::Init()
 {
 	// EquipmentSlotTags, EquipmentSockets 유효성 검사
-	if(!IsValid(EquipmentSlotTags)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::Init > EquipmentSlotTags is not valid")) return; }
+	if(!IsValid(EquipmentSlots)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::Init > EquipmentSlotTags is not valid")) return; }
 	if(!IsValid(EquipmentSockets)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::Init > EquipmentSockets is not valid")) return; }
 	
 	// 장비 슬롯(GameplayTag) 설정
 	SelectableTag = FThirdPersonGameplayTags::Get().EquipmentSlot_Active;
 	MainTag = FThirdPersonGameplayTags::Get().EquipmentSlot_Active_Main;
-	PrimarySlot = EquipmentSlotTags->GetPrimary();
+	PrimarySlot = EquipmentSlots->GetPrimary();
 
 	// Todo 상태가 변할 때마다 상태 객체를 새로 생성하면 코드 관리가 편리하지만, 장비 상태가 수시로 변하기 때문에 상태별로 하나의 객체만 생성하여 관리중인데 둘 다 해결할 수 있는 방법이 없을까?
 	// Equipment State 초기화
@@ -39,7 +42,7 @@ void UEquipmentComponent::Init()
 	EquipmentState = MainState;
 	EquipmentState->SetCurrentSlot(PrimarySlot);
 	
-	for(const FGameplayTag EquipmentSlot : EquipmentSlotTags->GetAll())
+	for(const FGameplayTag EquipmentSlot : EquipmentSlots->GetAll())
 	{
 		EquipmentItems.Add(FEquipmentItem(EquipmentSlot));
 		UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::Init > EquipmentSlot Added: %s"), *EquipmentSlot.GetTagName().ToString())
@@ -90,7 +93,7 @@ bool UEquipmentComponent::SelectEquipment(const FGameplayTag SelectedSlot)
 	if(!SelectedSlot.MatchesTag(SelectableTag)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s should be under %s"), *SelectedSlot.ToString(), *SelectableTag.ToString()) return false; }
 
 	// 선택한 장비 슬롯이 존재하는지 확인
-	if(!EquipmentSlotTags->GetAll().Contains(SelectedSlot)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s is not exist in %s::All"), *SelectedSlot.ToString(), *EquipmentSlotTags->GetName()) return false; }
+	if(!EquipmentSlots->GetAll().Contains(SelectedSlot)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s is not exist in %s::All"), *SelectedSlot.ToString(), *EquipmentSlots->GetName()) return false; }
 
 	// 무기 위치 스왑
 	EquipmentState->SwapToSelectedEquipment(SelectedSlot);
@@ -103,6 +106,11 @@ bool UEquipmentComponent::SelectEquipment(const FGameplayTag SelectedSlot)
 	
 	return true;
 	
+}
+
+bool UEquipmentComponent::RemoveEquipmentBySlot(FGameplayTag EquipmentSlot)
+{
+	GetEquipment(EquipmentSlot)->Destroy(); GetEquipmentItem(EquipmentSlot)->Clear(); return true;
 }
 
 bool UEquipmentComponent::SwapEquipmentsBySlot(FGameplayTag OriginSlot, FGameplayTag DestSlot)
@@ -196,6 +204,21 @@ bool UEquipmentComponent::SpawnEquipment(const FGameplayTag EquipmentSlot)
 	}
 	
 	return false;
+}
+
+FEquipmentItem* UEquipmentComponent::GetEquipmentItem(const FGameplayTag Slot)
+{
+	return EquipmentItems.FindByKey(Slot);
+}
+
+UEquipmentDefinition* UEquipmentComponent::GetEquipmentDefinition(const FGameplayTag Slot)
+{
+	if(GetEquipmentItem(Slot)){ return GetEquipmentItem(Slot)->EquipmentDefinition; } return nullptr;
+}
+
+AActor* UEquipmentComponent::GetEquipment(const FGameplayTag Slot)
+{
+	if(GetEquipmentItem(Slot)){ return GetEquipmentItem(Slot)->Equipment; } return nullptr;
 }
 
 void UEquipmentComponent::MoveEquipmentToSlot(const FGameplayTag OriginSlot, const FGameplayTag DestSlot)

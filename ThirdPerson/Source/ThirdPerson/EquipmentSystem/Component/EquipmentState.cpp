@@ -2,6 +2,7 @@
 
 
 #include "EquipmentState.h"
+#include "ThirdPerson/ThirdPerson.h"
 
 //////////////////////////////////////////////////////////////////////
 // Equipment State
@@ -22,6 +23,11 @@ void UEquipmentState::SwapToSelectedEquipment(FGameplayTag Slot)
 	{
 		SwapToSubEquipment();
 	}
+}
+
+void UEquipmentState::ChangeState(UEquipmentState* NewState) const
+{
+	EquipmentComponent->SetEquipmentState(NewState); UE_LOG(LogEquipment, Log, TEXT("EquipmentState::ChangeState > EquipmentState Changed to %s"), *NewState->GetName())
 }
 
 //////////////////////////////////////////////////////////////////////

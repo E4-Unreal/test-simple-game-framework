@@ -47,7 +47,7 @@ protected:
 	FORCEINLINE USubState* GetSubState() const { return EquipmentComponent->GetSubState(); }
 
 	// EquipmentComponent 멤버 함수 호출 간소화
-	FORCEINLINE void ChangeState(UEquipmentState* NewState) const { EquipmentComponent->SetEquipmentState(NewState); UE_LOG(LogEquipment, Log, TEXT("EquipmentState::ChangeState > EquipmentState Changed to %s"), *NewState->GetName()) }
+	FORCEINLINE void ChangeState(UEquipmentState* NewState) const;
 	FORCEINLINE void RestoreEquipmentToSlot(const FGameplayTag EquipmentSlot) const { EquipmentComponent->MoveEquipmentToSlot(EquipmentSlot, EquipmentSlot); }
 	FORCEINLINE void SwapSlots(const FGameplayTag OriginSlot, const FGameplayTag DestSlot) const
 	{

@@ -7,38 +7,11 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
-#include "ThirdPerson/Item/ItemDefinition.h"
+#include "ThirdPerson/EquipmentSystem/Item/EquipmentItem.h"
 #include "EquipmentComponent.generated.h"
 
-//////////////////////////////////////////////////////////////////////
-// Equipment Slots
-
-UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment Slot Tags", ShortTooltip = "Equipment SlotTags for Equipment Slots"))
-class THIRDPERSON_API UEquipmentSlotTags : public UDataAsset
-{
-	GENERATED_BODY()
-
-protected:
-	// Todo C++이 아니라 에디터에서 설정할 수 있는 게임플레이 태그를 제한하는 방법은 없을까?
-	
-	// Todo 프로젝트에 설정된 GameplayTag에 따라 meta=(Categories="") 커스터마이징 필요
-	// Todo FGameplayTagContainer로 변경?
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(Categories="EquipmentSlot"))
-	TArray<FGameplayTag> All;
-
-	// Todo 프로젝트에 설정된 GameplayTag에 따라 meta=(Categories="") 커스터마이징 필요
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(Categories="EquipmentSlot.Active.Main"))
-	FGameplayTag Primary;
-
-public:
-	FORCEINLINE TArray<FGameplayTag> GetAll() const { return All; }
-	FORCEINLINE FGameplayTag GetPrimary() const { return Primary; }
-};
-
-//////////////////////////////////////////////////////////////////////
-// Equipment Component
-
 class AEquipment;
+class UEquipmentSlots;
 class UEquipmentSockets;
 
 // 이벤트 디스패처 매크로
@@ -51,12 +24,12 @@ class THIRDPERSON_API UEquipmentComponent : public UActorComponent
 	
 	// 멤버 변수
 public:
+	// Todo 플레이어의 스탯에 따라 사용할 수 있는 슬롯을 추가할 때는 const 제거할 수도
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	UEquipmentSlotTags* EquipmentSlotTags;
-
-	// Todo EquipmentSockets->SocketMappings의 Key 값들을 EquipmentSlots에 들어있는 값으로만 설정 할 수 있는 방법은 없을까?
+	const UEquipmentSlots* EquipmentSlots;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	UEquipmentSockets* EquipmentSockets;
+	const UEquipmentSockets* EquipmentSockets;
 	
 protected:
 	TArray<FEquipmentItem> EquipmentItems;
@@ -97,7 +70,7 @@ public:
 	TArray<FEquipmentItem> GetEquipmentItems() const { return EquipmentItems; }
 	
 	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent | UI")
-	bool RemoveEquipmentBySlot(FGameplayTag EquipmentSlot){ GetEquipment(EquipmentSlot)->Destroy(); GetEquipmentItem(EquipmentSlot)->Clear(); return true;}
+	bool RemoveEquipmentBySlot(FGameplayTag EquipmentSlot);
 
 	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent | UI")
 	bool SwapEquipmentsBySlot(FGameplayTag OriginSlot, FGameplayTag DestSlot);
@@ -121,9 +94,9 @@ protected:
 	// Function with EquipmentSlot
 	const FName* CheckSocket(const FGameplayTag EquipmentSlot) const;
 	bool SpawnEquipment(const FGameplayTag EquipmentSlot);
-	FORCEINLINE FEquipmentItem* GetEquipmentItem(const FGameplayTag Slot){ return EquipmentItems.FindByKey(Slot); }
-	FORCEINLINE UEquipmentDefinition* GetEquipmentDefinition(const FGameplayTag Slot){ if(GetEquipmentItem(Slot)){ return GetEquipmentItem(Slot)->EquipmentDefinition; } return nullptr; }
-	FORCEINLINE AActor* GetEquipment(const FGameplayTag Slot) { if(GetEquipmentItem(Slot)){ return GetEquipmentItem(Slot)->Equipment; } return nullptr; }
+	FORCEINLINE FEquipmentItem* GetEquipmentItem(const FGameplayTag Slot);
+	FORCEINLINE UEquipmentDefinition* GetEquipmentDefinition(const FGameplayTag Slot);
+	FORCEINLINE AActor* GetEquipment(const FGameplayTag Slot);
 	void MoveEquipmentToSlot(const FGameplayTag OriginSlot, const FGameplayTag DestSlot);
 	bool SetEquipmentDisabled(const bool bDisable, const FGameplayTag EquipmentSlot);
 	

@@ -4,8 +4,8 @@
 
 
 #include "Equipment.h"
-#include "ThirdPerson/Item/ItemDefinition.h"
 #include "ThirdPerson/ThirdPerson.h"
+#include "EquipmentItem.h"
 
 
 // Sets default values
