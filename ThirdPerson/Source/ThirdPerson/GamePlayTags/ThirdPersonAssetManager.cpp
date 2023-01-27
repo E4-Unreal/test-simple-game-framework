@@ -31,6 +31,6 @@ void UThirdPersonAssetManager::StartInitialLoading()
 {
 	Super::StartInitialLoading();
 
-	//Load Native Tags
+	//Load Custom Native Tags
 	FThirdPersonGameplayTags::InitializeNativeTags();
 }

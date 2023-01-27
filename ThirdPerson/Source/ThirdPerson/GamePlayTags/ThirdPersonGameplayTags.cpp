@@ -23,6 +23,14 @@ void FThirdPersonGameplayTags::InitializeNativeTags()
 
 void FThirdPersonGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 {
+	ADD_TAG(EquipmentSlot_Active, "EquipmentSlot for Active Equipment");
+	ADD_TAG(EquipmentSlot_Passive, "EquipmentSlot for Passive Equipment");
+	ADD_TAG(EquipmentSlot_Active_Main, "EquipmentSlot for Main Active Equipment");
+	ADD_TAG(EquipmentSlot_Active_Sub, "EquipmentSlot for Sub Active Equipment");
+	ADD_TAG(Item, "Item");
+	ADD_TAG(Item_Equipment, "Equipment Item");
+
+	/*
 	// Equipment Slot
 	ADD_TAG(EquipmentSlot, "EquipmentSlot for Equipment");
 	ADD_TAG(EquipmentSlot_Active, "EquipmentSlot for Active Equipment");
@@ -66,6 +74,7 @@ void FThirdPersonGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 	ADD_TAG(Item_Equipment_Passive_Armor_Chest, "Chest Armor");
 	ADD_TAG(Item_Equipment_Passive_Armor_Leg, "Leg Armor");
 	ADD_TAG(Item_Equipment_Passive_Armor_Arm, "Arm Armor");
+	*/
 }
 
 // Todo OutTag의 변수명을 분석하여 TagName을 자동으로 추가하는 기능 필요

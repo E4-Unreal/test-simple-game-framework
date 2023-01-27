@@ -23,8 +23,8 @@ class THIRDPERSON_API UEquipmentState : public UObject
 	GENERATED_BODY()
 	
 protected:
-	FGameplayTag CurrentSlot;
-	FGameplayTag SelectedSlot;
+	FEquipmentSlot CurrentSlot;
+	FEquipmentSlot SelectedSlot;
 
 	// Get From EquipmentComponent in Constructor
 	UPROPERTY()
@@ -35,21 +35,21 @@ public:
 	
 	virtual void SwapToMainEquipment() {}
 	virtual void SwapToSubEquipment() {}
-	virtual void SwapToSelectedEquipment(FGameplayTag Slot);
-	FORCEINLINE FGameplayTag GetCurrentSlot() const { return CurrentSlot; }
-	FORCEINLINE void SetCurrentSlot(FGameplayTag Slot) { CurrentSlot = Slot; }
+	virtual void SwapToSelectedEquipment(FEquipmentSlot Slot);
+	FORCEINLINE FEquipmentSlot GetCurrentSlot() const { return CurrentSlot; }
+	FORCEINLINE void SetCurrentSlot(FEquipmentSlot Slot) { CurrentSlot = Slot; }
 
 protected:
 	// EquipmentComponent 멤버 변수 사용 간소화
-	FORCEINLINE FGameplayTag GetMainTag() const { return EquipmentComponent->MainTag; }
-	FORCEINLINE FGameplayTag GetPrimarySlot() const { return EquipmentComponent->PrimarySlot; }
+	FORCEINLINE FName GetMainTag() const { return EquipmentComponent->MainTag; }
+	FORCEINLINE FEquipmentSlot GetPrimarySlot() const { return EquipmentComponent->PrimarySlot; }
 	FORCEINLINE UMainState* GetMainState() const { return EquipmentComponent->GetMainState(); }
 	FORCEINLINE USubState* GetSubState() const { return EquipmentComponent->GetSubState(); }
 
 	// EquipmentComponent 멤버 함수 호출 간소화
 	FORCEINLINE void ChangeState(UEquipmentState* NewState) const;
-	FORCEINLINE void RestoreEquipmentToSlot(const FGameplayTag EquipmentSlot) const { EquipmentComponent->MoveEquipmentToSlot(EquipmentSlot, EquipmentSlot); }
-	FORCEINLINE void SwapSlots(const FGameplayTag OriginSlot, const FGameplayTag DestSlot) const
+	FORCEINLINE void RestoreEquipmentToSlot(const FEquipmentSlot EquipmentSlot) const { EquipmentComponent->MoveEquipmentToSlot(EquipmentSlot, EquipmentSlot); }
+	FORCEINLINE void SwapSlots(const FEquipmentSlot OriginSlot, const FEquipmentSlot DestSlot) const
 	{
 		EquipmentComponent->MoveEquipmentToSlot(OriginSlot, DestSlot);
 		EquipmentComponent->MoveEquipmentToSlot(DestSlot, OriginSlot);
@@ -80,10 +80,10 @@ class THIRDPERSON_API USubState : public UEquipmentState
 public:
 	virtual void SwapToMainEquipment() override;
 	virtual void SwapToSubEquipment() override;
-	virtual void SwapToSelectedEquipment(FGameplayTag Slot) override;
+	virtual void SwapToSelectedEquipment(const FEquipmentSlot Slot) override;
 
 protected:
 	// 투척물과 같은 서브 장비들은 사용 후 원래 들고 있던 주 장비로 자동 스왑이 필요
-	void ReturnToMainState();
+	void ReturnToMainState() const;
 	
 };

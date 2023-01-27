@@ -5,7 +5,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 #include "ThirdPerson/EquipmentSystem/Item/EquipmentItem.h"
 #include "EquipmentComponent.generated.h"
@@ -47,10 +46,8 @@ protected:
 	USubState* SubState;
 
 	// For SelectEquipment()
-	// Todo static으로 만들거나 이것도 설정 가능하도록 만들 예정
-	FGameplayTag SelectableTag;
-	FGameplayTag MainTag;
-	FGameplayTag PrimarySlot;
+	FName MainTag;
+	FEquipmentSlot PrimarySlot;
 
 	// 멤버 함수
 public:
@@ -60,20 +57,23 @@ public:
 	void Init();
 
 	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent")
+	bool CheckEquipSlot(UEquipmentDefinition* NewEquipment);
+	
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent")
 	bool AddEquipment(UEquipmentDefinition* NewEquipment);
 
 	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent")
-	bool SelectEquipment(const FGameplayTag SelectedSlot);
+	bool SelectEquipment(const FEquipmentSlot SelectedSlot);
 
 	// For UI
 	UFUNCTION(BlueprintPure, Category = "EquipmentComponent | UI")
 	TArray<FEquipmentItem> GetEquipmentItems() const { return EquipmentItems; }
 	
 	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent | UI")
-	bool RemoveEquipmentBySlot(FGameplayTag EquipmentSlot);
+	bool RemoveEquipmentBySlot(FEquipmentSlot EquipmentSlot);
 
 	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent | UI")
-	bool SwapEquipmentsBySlot(FGameplayTag OriginSlot, FGameplayTag DestSlot);
+	bool SwapEquipmentsBySlot(FEquipmentSlot OriginSlot, FEquipmentSlot DestSlot);
 	
 	// 이벤트 디스패처
 	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent | EvenetDispatcher")
@@ -86,19 +86,29 @@ public:
 	FEquipmentDelegate OnEquipmentSwapped;
 
 protected:
+	// Depend on UEquipmentSlots
+	void ApplyEquipmentSlots();
+	
 	// For EquipmentState
 	FORCEINLINE void SetEquipmentState(UEquipmentState* NewState) { EquipmentState = NewState; }
 	FORCEINLINE UMainState* GetMainState() const { return MainState; }
 	FORCEINLINE USubState* GetSubState() const { return SubState; }
 
-	// Function with EquipmentSlot
-	const FName* CheckSocket(const FGameplayTag EquipmentSlot) const;
-	bool SpawnEquipment(const FGameplayTag EquipmentSlot);
-	FORCEINLINE FEquipmentItem* GetEquipmentItem(const FGameplayTag Slot);
-	FORCEINLINE UEquipmentDefinition* GetEquipmentDefinition(const FGameplayTag Slot);
-	FORCEINLINE AActor* GetEquipment(const FGameplayTag Slot);
-	void MoveEquipmentToSlot(const FGameplayTag OriginSlot, const FGameplayTag DestSlot);
-	bool SetEquipmentDisabled(const bool bDisable, const FGameplayTag EquipmentSlot);
+	// Function with FEquipmentSlot
+	// Depend on UEquipmentSockets
+	const FName* CheckSocket(const FEquipmentSlot EquipmentSlot) const;
+
+	// Depend on UEquipmentDefinition
+	bool SpawnEquipment(const FEquipmentSlot EquipmentSlot);
+
+	// Depend on FEquipmentItem
+	FORCEINLINE FEquipmentItem* GetEquipmentItem(const FEquipmentSlot Slot);
+	FORCEINLINE UEquipmentDefinition* GetEquipmentDefinition(const FEquipmentSlot Slot);
+	FORCEINLINE AActor* GetEquipment(const FEquipmentSlot Slot);
+
+	// Based on GetEquipmentItem(), GetEquipmentDefinition(), GetEquipment()
+	void MoveEquipmentToSlot(const FEquipmentSlot OriginSlot, const FEquipmentSlot DestSlot);
+	bool SetEquipmentDisabled(const bool bDisable, const FEquipmentSlot EquipmentSlot);
 	
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -106,7 +116,4 @@ protected:
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	// EquipmentComponent에서 사용하는 데이터 애셋들의 로딩이 완료된 후 초기화 진행
-	virtual void PostLoad() override;
 };

@@ -12,10 +12,10 @@ UEquipmentState::UEquipmentState()
 	EquipmentComponent = Cast<UEquipmentComponent>(GetOuter());
 }
 
-void UEquipmentState::SwapToSelectedEquipment(FGameplayTag Slot)
+void UEquipmentState::SwapToSelectedEquipment(FEquipmentSlot Slot)
 {
 	SelectedSlot = Slot;
-	if(SelectedSlot.MatchesTag(GetMainTag()))
+	if(SelectedSlot.IsMain(GetMainTag()))
 	{
 		SwapToMainEquipment();
 	}
@@ -35,11 +35,11 @@ void UEquipmentState::ChangeState(UEquipmentState* NewState) const
 void UMainState::SwapToMainEquipment()
 {
 	// 현재 주 장비와 선택된 주 장비 부착 위치 교체
-	if(CurrentSlot.MatchesTagExact(GetPrimarySlot()))
+	if(CurrentSlot == GetPrimarySlot())
 	{
 		SwapSlots(CurrentSlot, SelectedSlot);
 	}
-	else if(SelectedSlot.MatchesTagExact(GetPrimarySlot()))
+	else if(SelectedSlot == GetPrimarySlot())
 	{
 		RestoreEquipmentToSlot(GetPrimarySlot());
 		RestoreEquipmentToSlot(CurrentSlot);
@@ -101,14 +101,14 @@ void USubState::SwapToSubEquipment()
 	CurrentSlot = SelectedSlot;
 }
 
-void USubState::SwapToSelectedEquipment(FGameplayTag Slot)
+void USubState::SwapToSelectedEquipment(const FEquipmentSlot Slot)
 {
 	// 현재 서브 장비 원위치
 	RestoreEquipmentToSlot(CurrentSlot);
 	Super::SwapToSelectedEquipment(Slot);
 }
 
-void USubState::ReturnToMainState()
+void USubState::ReturnToMainState() const
 {
 	// 원래 들고 있던 주 장비 활성화
 	EquipmentComponent->SetEquipmentDisabled(false, GetMainState()->GetCurrentSlot());

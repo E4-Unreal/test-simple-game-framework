@@ -32,7 +32,9 @@ protected:
 public:
 	FORCEINLINE USkeletalMesh* GetSkeletalMeshAsset() const { return SkeletalMeshAsset; }
 	FORCEINLINE TMap<FGameplayTag, FName> GetSocketMappings() const { return SocketMappings; }
+	FORCEINLINE TMap<FGameplayTag, FName> GetRegisteredSockets() const { return RegisteredSockets; }
 
+protected:
 	// RegisteredSockets의 요소들을 UnregisteredSockets로 이전
 	void DeregisterAll();
 	// SocketTags 목록들을 전부 RegisteredSockets에 추가

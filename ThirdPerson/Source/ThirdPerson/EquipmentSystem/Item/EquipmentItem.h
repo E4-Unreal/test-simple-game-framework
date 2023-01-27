@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
+#include "ThirdPerson/EquipmentSystem/Component/EquipmentSlots.h"
 #include "ThirdPerson/Item/ItemDefinition.h"
 #include "EquipmentItem.generated.h"
 
@@ -34,6 +34,73 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+// Equipment Slot
+
+USTRUCT(Atomic, BlueprintType, Meta = (DisplayName = "Equipment Item", ShortTooltip = "Struct used for EquipmentComponent"))
+struct FEquipmentSlot
+{
+	GENERATED_USTRUCT_BODY()
+
+protected:
+	// 멤버 변수
+	UPROPERTY(BlueprintReadOnly)
+	FName SlotName;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FGameplayTag> CategoryTags;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int32 Index = 0;
+
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTag SocketTag;
+
+public:
+	// 멤버 함수
+	FEquipmentSlot(){}
+	FEquipmentSlot(const FMainEquipmentSlot& EquipmentSlot, const int32 Index)
+	{
+		this->SlotName = EquipmentSlot.SlotName;
+		this->CategoryTags = EquipmentSlot.CategoryTags;
+		this->Index = Index;
+		this->SocketTag = EquipmentSlot.SocketTags[Index];
+	}
+
+	FEquipmentSlot(const FSubEquipmentSlot& EquipmentSlot, const int32 Index)
+	{
+		this->SlotName = EquipmentSlot.SlotName;
+		this->CategoryTags = EquipmentSlot.CategoryTags;
+		this->Index = Index;
+		this->SocketTag = EquipmentSlot.SocketTags[Index];
+	}
+
+	FORCEINLINE FName GetSlotName() const { return SlotName; }
+	FORCEINLINE TArray<FGameplayTag> GetCategoryTags() const { return CategoryTags; }
+	FORCEINLINE int32 GetIndex() const { return Index; }
+	FORCEINLINE FGameplayTag GetSocketTag() const { return SocketTag; }
+
+	FORCEINLINE bool operator==(const FEquipmentSlot Other) const { return this->SlotName == Other.SlotName && this->Index == Other.Index; }
+	FORCEINLINE bool operator!=(const FEquipmentSlot Other) const { return !(this->SlotName == Other.SlotName && this->Index == Other.Index); }
+	
+	//////////////////////////////////////////////////////////////////////
+	
+	FORCEINLINE FString GetName() const { return SlotName.ToString() + FString("[") + FString::FromInt(Index) + FString("]"); }
+	FORCEINLINE bool IsMain(const FName MainTag) const { return SlotName == MainTag; }
+	FORCEINLINE bool Matches(FEquipmentSlot Other) const { return this->SlotName == Other.GetSlotName(); }
+	FORCEINLINE bool Contains(FGameplayTag Other) const
+	{
+		for(FGameplayTag CategoryTag : CategoryTags)
+		{
+			if(Other.MatchesTagExact(CategoryTag))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
 // Equipment Item
 
 USTRUCT(Atomic, BlueprintType, Meta = (DisplayName = "Equipment Item", ShortTooltip = "Struct used for EquipmentComponent"))
@@ -44,7 +111,7 @@ struct FEquipmentItem
 public:
 	// 멤버 변수
 	UPROPERTY(BlueprintReadOnly)
-	FGameplayTag EquipmentSlot;
+	FEquipmentSlot EquipmentSlot;
 	
 	UPROPERTY(BlueprintReadOnly)
 	UEquipmentDefinition* EquipmentDefinition = nullptr;
@@ -54,7 +121,7 @@ public:
 	
 	// 멤버 함수
 	FEquipmentItem() {}
-	FEquipmentItem(FGameplayTag EquipmentSlot)
+	FEquipmentItem(FEquipmentSlot EquipmentSlot)
 	{
 		this->EquipmentSlot = EquipmentSlot;
 	};
@@ -83,6 +150,13 @@ public:
 	}
 
 	// For TArray.FindByKey
-	FORCEINLINE bool operator==(FGameplayTag Other) const { return this->EquipmentSlot.MatchesTagExact(Other); }
-	FORCEINLINE bool operator!=(FGameplayTag Other) const { return !this->EquipmentSlot.MatchesTagExact(Other); }
+	FORCEINLINE bool operator==(FEquipmentSlot Other) const { return this->EquipmentSlot == Other; }
+	FORCEINLINE bool operator!=(FEquipmentSlot Other) const { return this->EquipmentSlot != Other; }
+
+	//FORCEINLINE bool operator==(FName Other) const { return this->EquipmentSlot.GetSlotName() == Other; }
+	//FORCEINLINE bool operator!=(FName Other) const { return this->EquipmentSlot.GetSlotName() != Other; }
+
+	// UEquipmentComponent::CheckEquipSlot(UEquipmentDefinition* NewEquipment)
+	FORCEINLINE bool operator==(UEquipmentDefinition* Other) const { return this->EquipmentSlot.Contains(Other->EquipmentSlotTag); }
+	FORCEINLINE bool operator!=(UEquipmentDefinition* Other) const { return !(this->EquipmentSlot.Contains(Other->EquipmentSlotTag)); }
 };

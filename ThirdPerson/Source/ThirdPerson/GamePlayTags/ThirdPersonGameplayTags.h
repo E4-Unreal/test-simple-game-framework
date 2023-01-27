@@ -21,6 +21,14 @@ public:
 
 	static void InitializeNativeTags();
 
+	FGameplayTag EquipmentSlot_Active;
+	FGameplayTag EquipmentSlot_Passive;
+	FGameplayTag EquipmentSlot_Active_Main;
+	FGameplayTag EquipmentSlot_Active_Sub;
+	FGameplayTag Item;
+	FGameplayTag Item_Equipment;
+
+	/*
 	// Equipment Slot
 	FGameplayTag EquipmentSlot;
 	FGameplayTag EquipmentSlot_Active;
@@ -64,7 +72,7 @@ public:
 	FGameplayTag Item_Equipment_Passive_Armor_Chest;
 	FGameplayTag Item_Equipment_Passive_Armor_Leg;
 	FGameplayTag Item_Equipment_Passive_Armor_Arm;
-
+	*/
 protected:
 	//Registers all of the tags with the GameplayTags Manager
 	void AddAllTags(UGameplayTagsManager& Manager);
