@@ -57,7 +57,7 @@ class THIRDPERSON_API AActiveEquipment : public AEquipment
 	// 멤버 변수
 public:
 	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* MappingContext;
 
 	// 멤버 함수

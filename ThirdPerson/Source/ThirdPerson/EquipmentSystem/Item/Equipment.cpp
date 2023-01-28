@@ -64,6 +64,7 @@ void AEquipment::PostInitializeComponents()
 
 void AActiveEquipment::Bind()
 {
+	UE_LOG(LogEquipment, Log, TEXT("AActiveEquipment::Bind()"))
 	// 유효성 검사
 	if(!IsValid(GetOwner())){ UE_LOG(LogEquipment, Warning, TEXT("AActiveEquipment::Bind > %s: Owner is not valid"), *this->GetName()) return; }
 	
@@ -79,10 +80,12 @@ void AActiveEquipment::Bind()
 
 	// 플레이어 입력 활성화
 	this->EnableInput(PlayerController);
+	UE_LOG(LogEquipment, Log, TEXT("AActiveEquipment::Bind > %s is Binded"), *this->GetName())
 }
 
 void AActiveEquipment::Unbind()
 {
+	UE_LOG(LogEquipment, Log, TEXT("AActiveEquipment::Unbind()"))
 	// 유효성 검사
 	if(!IsValid(GetOwner())){ UE_LOG(LogEquipment, Warning, TEXT("AActiveEquipment::Bind > %s: Owner is not valid"), *this->GetName()) return; }
 	
@@ -96,8 +99,9 @@ void AActiveEquipment::Unbind()
 		Subsystem->RemoveMappingContext(MappingContext);
 	}
 
-	// 플레이어 입력 활성화
-	this->EnableInput(PlayerController);
+	// 플레이어 입력 비활성화
+	this->DisableInput(PlayerController);
+	UE_LOG(LogEquipment, Log, TEXT("AActiveEquipment::Bind > %s is Unbinded"), *this->GetName())
 }
 
 void AActiveEquipment::BeginPlay()

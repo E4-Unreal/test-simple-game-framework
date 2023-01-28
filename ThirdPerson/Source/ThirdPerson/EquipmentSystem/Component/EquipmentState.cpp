@@ -57,7 +57,7 @@ void UMainState::SwapToMainEquipment()
 	}
 	
 	// 선택된 장비 슬롯으로 CurrentSlot 변경
-	SetCurrentSlot(CurrentSlot);
+	SetCurrentSlot(SelectedSlot);
 }
 
 void UMainState::SwapToSubEquipment()

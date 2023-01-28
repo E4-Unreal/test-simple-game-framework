@@ -61,6 +61,16 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 {
 	// 장비 슬롯에 장착할 수 있는지 확인
 	if(!CanEquip(NewEquipment)) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::AddEquipment > %s is not equipable"), *NewEquipment->GetName()) return false; }
+
+	// 현재 들고 있는 장비가 있는지 확인
+	bool bEmpty = false;
+	if(EquipmentItems.FindByKey(EquipmentState->GetCurrentSlot())->IsEmpty())
+	{
+		UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::AddEquipment > Current Equipment is Empty"))
+		bEmpty = true;
+	}
+
+	
 	for(FEquipmentItem& EquipmentItem : EquipmentItems)
 	{
 		if(EquipmentItem.IsAddable(NewEquipment))
@@ -79,11 +89,29 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 			// 장비를 해당 소켓에 부착
 			MoveEquipmentToSlot(EquipmentItem.EquipmentSlot, EquipmentItem.EquipmentSlot);
 
-			// 현재 들고 있는 장비가 없다면, 습득한 장비를 선택
-			if(EquipmentItems.FindByKey(EquipmentState->GetCurrentSlot())->IsEmpty()){ SelectEquipment(EquipmentItem.EquipmentSlot); }
+			// Todo Refactoring
+			// 기존에 들고 있는 장비가 없었다면, 습득한 장비를 선택
+			if(bEmpty)
+			{
+				if(EquipmentState->GetCurrentSlot() == EquipmentItem.EquipmentSlot && OnEquipmentSelected.IsBound())
+				{
+					// 주 무기 습득 시에는 OnEquipmentSelected만 호출
+					UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::AddEquipment > Broadcast OnEquipmentSelected"))
+					OnEquipmentSelected.Broadcast();
+				}
+				else
+				{
+					// 보조 무기 습득 시에는 해당 슬롯 선택
+					SelectEquipment(EquipmentItem.EquipmentSlot);
+				}
+			}
 
 			// 이벤트 디스패처 호출
-			OnEquipmentAdded.Broadcast();
+			if(OnEquipmentAdded.IsBound())
+			{
+				UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::AddEquipment > Broadcast OnEquipmentAdded"))
+				OnEquipmentAdded.Broadcast();
+			}
 			
 			return true;
 		}
@@ -94,6 +122,8 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 
 bool UEquipmentComponent::SelectEquipment(FEquipmentSlot SelectedSlot)
 {
+	UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > SelectedSlot: %s"), *SelectedSlot.GetName())
+		
 	if(!IsValid(EquipmentState)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > EquipmentState is not valid")) return false;}
 	
 	// 이미 선택된 장비 슬롯이라면 무시
@@ -114,7 +144,11 @@ bool UEquipmentComponent::SelectEquipment(FEquipmentSlot SelectedSlot)
 	// Binding Equipment with SelectedSlot....
 
 	// 이벤트 디스패처 호출
-	OnEquipmentSelected.Broadcast();
+	if(OnEquipmentSelected.IsBound())
+	{
+		UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > Broadcast OnEquipmentSelected"))
+		OnEquipmentSelected.Broadcast();
+	}
 	
 	return true;
 	
