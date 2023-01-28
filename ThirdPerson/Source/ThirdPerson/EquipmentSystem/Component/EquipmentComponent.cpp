@@ -19,8 +19,6 @@ UEquipmentComponent::UEquipmentComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
-
-	
 }
 
 void UEquipmentComponent::Init()
@@ -40,7 +38,12 @@ void UEquipmentComponent::Init()
 	EquipmentState->SetCurrentSlot(PrimarySlot);
 }
 
-bool UEquipmentComponent::CheckEquipSlot(UEquipmentDefinition* NewEquipment)
+AEquipment* UEquipmentComponent::GetCurrentEquipment()
+{
+	return GetEquipment(EquipmentState->GetCurrentSlot());
+}
+
+bool UEquipmentComponent::CanEquip(UEquipmentDefinition* NewEquipment)
 {
 	// 유효성 검사
 	if(!IsValid(NewEquipment)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::ChekcEquipable > NewEquipment is not valid")) return false; }
@@ -57,7 +60,7 @@ bool UEquipmentComponent::CheckEquipSlot(UEquipmentDefinition* NewEquipment)
 bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 {
 	// 장비 슬롯에 장착할 수 있는지 확인
-	if(!CheckEquipSlot(NewEquipment)) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::AddEquipment > %s is not equipable"), *NewEquipment->GetName()) return false; }
+	if(!CanEquip(NewEquipment)) { UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::AddEquipment > %s is not equipable"), *NewEquipment->GetName()) return false; }
 	for(FEquipmentItem& EquipmentItem : EquipmentItems)
 	{
 		if(EquipmentItem.IsAddable(NewEquipment))
@@ -65,8 +68,10 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 			// 유효성 검사
 			if(!IsValid(NewEquipment)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::AddEquipment > NewEquipment is not valid")) return false; }
 
+			UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::AddEquipment > EquipmentSlot: %s / EquipmentDefinition: %s"), *EquipmentItem.EquipmentSlot.GetName(), *NewEquipment->GetName())
+			
 			// EquipmentItem에 EquipmentDefinition 저장
-			EquipmentItem.Add(NewEquipment);
+			EquipmentItem.SetEquipmentDefinition(NewEquipment);
 			
 			// 장비 스폰 후 저장
 			SpawnEquipment(EquipmentItem.EquipmentSlot);
@@ -87,20 +92,21 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 	return false;
 }
 
-bool UEquipmentComponent::SelectEquipment(const FEquipmentSlot SelectedSlot)
+bool UEquipmentComponent::SelectEquipment(FEquipmentSlot SelectedSlot)
 {
 	if(!IsValid(EquipmentState)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > EquipmentState is not valid")) return false;}
 	
 	// 이미 선택된 장비 슬롯이라면 무시
 	// Todo Refactoring
 	if(SelectedSlot == (EquipmentState->GetCurrentSlot())){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > Already Selected Slot")) return false; }
-
-	// 선택할 수 있는 장비 슬롯인지 확인 (Active)
 	
-	
-	// 선택한 장비 슬롯이 존재하는지 확인
-	if(EquipmentItems.FindByKey(SelectedSlot)) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s is not exist in %s::All"), *SelectedSlot.GetName(), *EquipmentSlots->GetName()) return false; }
+	// 선택한 장비 슬롯이 존재하는지 확인 
+	const FEquipmentItem* EquipmentItem = GetEquipmentItem(SelectedSlot);
+	if(EquipmentItem == nullptr) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s is not exist"), *SelectedSlot.GetName()) return false; }
 
+	// 선택한 장비 슬롯이 선택 가능한지 확인
+	if(!SelectedSlot.IsActiveSlot()) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SelectEquipment > %s is not Active Slot"), *SelectedSlot.GetName()) return false; }
+	
 	// 무기 위치 스왑
 	EquipmentState->SwapToSelectedEquipment(SelectedSlot);
 
@@ -114,28 +120,30 @@ bool UEquipmentComponent::SelectEquipment(const FEquipmentSlot SelectedSlot)
 	
 }
 
-bool UEquipmentComponent::RemoveEquipmentBySlot(FEquipmentSlot EquipmentSlot)
+UEquipmentDefinition* UEquipmentComponent::RemoveEquipmentItem(FEquipmentSlot EquipmentSlot)
 {
-	GetEquipment(EquipmentSlot)->Destroy(); GetEquipmentItem(EquipmentSlot)->Clear(); return true;
+	UEquipmentDefinition* EquipmentDefinition = GetEquipmentDefinition(EquipmentSlot);
+	GetEquipmentItem(EquipmentSlot)->Clear();
+	return EquipmentDefinition;
 }
 
-bool UEquipmentComponent::SwapEquipmentsBySlot(const FEquipmentSlot OriginSlot, const FEquipmentSlot DestSlot)
+bool UEquipmentComponent::SwapEquipmentItems(FEquipmentSlot OriginSlot, FEquipmentSlot DestSlot)
 {
 	// 스왑 가능한 슬롯인지 확인
 	UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SwapEquipmentsBySlot > %s to %s"),*OriginSlot.GetName(), *DestSlot.GetName())
-	if(OriginSlot.Matches(DestSlot)){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SwapEquipmentsBySlot > Not Same Category")) return false; }
+	if(!OriginSlot.MatchesSlotName(DestSlot)){ UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SwapEquipmentsBySlot > Not Same Category")) return false; }
 
-	// 장비 슬롯 스왑
+	// 선택한 장비 슬롯들이 존재하는지 확인 
 	FEquipmentItem* OriginEquipmentItem = GetEquipmentItem(OriginSlot);
 	FEquipmentItem* DestEquipmentItem = GetEquipmentItem(DestSlot);
+	if(OriginEquipmentItem == nullptr) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SwapEquipmentItems > %s is not exist"), *OriginSlot.GetName()) return false; }
+	if(DestEquipmentItem == nullptr) { UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::SwapEquipmentItems > %s is not exist"), *DestSlot.GetName()) return false; }
 	
 	const FEquipmentItem Tem = *OriginEquipmentItem;
-	OriginEquipmentItem->Clear();
-	OriginEquipmentItem->Add(DestEquipmentItem->EquipmentDefinition);
+	OriginEquipmentItem->SetEquipmentDefinition(DestEquipmentItem->EquipmentDefinition);
 	OriginEquipmentItem->SetEquipment(DestEquipmentItem->Equipment);
-
-	DestEquipmentItem->Clear();
-	DestEquipmentItem->Add(Tem.EquipmentDefinition);
+	
+	DestEquipmentItem->SetEquipmentDefinition(Tem.EquipmentDefinition);
 	DestEquipmentItem->SetEquipment(Tem.Equipment);
 
 	// 장비 부착 위치 업데이트
@@ -156,7 +164,7 @@ bool UEquipmentComponent::SwapEquipmentsBySlot(const FEquipmentSlot OriginSlot, 
 
 		// Todo Refactoring
 		// 만약 현재 선택된 장비가 주 장비가 아니라면 PrimarySlot의 주 장비 비활성화
-		if(!EquipmentState->GetCurrentSlot().IsMain(MainTag))
+		if(!EquipmentState->GetCurrentSlot().IsMainSlot())
 		{
 			SetEquipmentDisabled(true, PrimarySlot);
 		}
@@ -175,19 +183,30 @@ void UEquipmentComponent::ApplyEquipmentSlots()
 
 	// EquipmentSlots를 바탕으로 EquipmentItems 생성
 	const FMainEquipmentSlot MainEquipmentSlot = EquipmentSlots->GetMainEquipmentSlot();
-	const TArray<FSubEquipmentSlot> SubEquipmentSlot = EquipmentSlots->GetSubEquipmentSlot();
+	const TArray<FSubEquipmentSlot> SubEquipmentSlotList = EquipmentSlots->GetSubEquipmentSlotList();
+	const TArray<FPassiveEquipmentSlot> PassiveEquipmentSlotList = EquipmentSlots->GetPassiveEquipmentSlotList();
 
 	// Main EquipmentItems
-	int32 Count = MainEquipmentSlot.SocketTags.Num();
+	int32 Count = MainEquipmentSlot.Sockets.Num();
 	for(int i = 0; i < Count; i++)
 	{
 		EquipmentItems.Add(FEquipmentItem(FEquipmentSlot(MainEquipmentSlot, i)));
 	}
 
 	// Sub EquipmentItems
-	for(const FSubEquipmentSlot& EquipmentSlot : SubEquipmentSlot)
+	for(const FSubEquipmentSlot& EquipmentSlot : SubEquipmentSlotList)
 	{
-		Count = EquipmentSlot.SocketTags.Num();
+		Count = EquipmentSlot.Sockets.Num();
+		for(int i = 0; i < Count; i++)
+		{
+			EquipmentItems.Add(FEquipmentItem(FEquipmentSlot(EquipmentSlot, i)));
+		}
+	}
+
+	// Passive EquipmentItems
+	for(const FPassiveEquipmentSlot& EquipmentSlot : PassiveEquipmentSlotList)
+	{
+		Count = EquipmentSlot.Sockets.Num();
 		for(int i = 0; i < Count; i++)
 		{
 			EquipmentItems.Add(FEquipmentItem(FEquipmentSlot(EquipmentSlot, i)));
@@ -200,8 +219,10 @@ void UEquipmentComponent::ApplyEquipmentSlots()
 	}
 
 	// PrimarySlot 설정
-	MainTag = MainEquipmentSlot.SlotName;
-	PrimarySlot = FEquipmentSlot(MainEquipmentSlot, 0);
+	if(MainEquipmentSlot.Sockets.Num() > 0)
+	{
+		PrimarySlot = FEquipmentSlot(MainEquipmentSlot, 0);
+	}
 }
 
 const FName* UEquipmentComponent::CheckSocket(const FEquipmentSlot EquipmentSlot) const
@@ -212,7 +233,7 @@ const FName* UEquipmentComponent::CheckSocket(const FEquipmentSlot EquipmentSlot
 	if(!IsValid(OwnerCharacter)){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::CheckSocket > OwnerCharacter not found")) return nullptr; }
 
 	// EquipmentSlot에 대응하는 소켓 확인
-	const FName* SocketName = EquipmentSockets->GetRegisteredSockets().Find(EquipmentSlot.GetSocketTag());
+	const FName* SocketName = EquipmentSockets->GetRegisteredSockets().Find(EquipmentSlot.GetSocket());
 	if(SocketName == nullptr){ UE_LOG(LogEquipment, Warning, TEXT("EquipmentComponent::CheckSocket > Check %s is in %s / SocketName == nullptr"), *EquipmentSlot.GetName(), *EquipmentSockets->GetName()) return nullptr;}
 	if(SocketName->IsNone()){ UE_LOG(LogEquipment, Error, TEXT("EquipmentComponent::CheckSocket > Check %s is initialized / SocketName->IsNone()"), *EquipmentSockets->GetName()) return nullptr;}
 
@@ -225,7 +246,7 @@ const FName* UEquipmentComponent::CheckSocket(const FEquipmentSlot EquipmentSlot
 	return SocketName;
 }
 
-bool UEquipmentComponent::SpawnEquipment(const FEquipmentSlot EquipmentSlot)
+bool UEquipmentComponent::SpawnEquipment(FEquipmentSlot EquipmentSlot)
 {
 	// 유효성 검사
 	UEquipmentDefinition* EquipmentDefinition = GetEquipmentDefinition(EquipmentSlot);
@@ -235,7 +256,7 @@ bool UEquipmentComponent::SpawnEquipment(const FEquipmentSlot EquipmentSlot)
 	UWorld* World = GetWorld();
 	if(!IsValid(World)) { return false; }
 	const FTransform SpawnLocAndRotation;
-	if(AEquipment* SpawnedEquipment = World->SpawnActorDeferred<AEquipment>(EquipmentDefinition->ClassToSpawn, SpawnLocAndRotation))
+	if(AEquipment* SpawnedEquipment = World->SpawnActorDeferred<AEquipment>(EquipmentDefinition->ClassToSpawn, SpawnLocAndRotation, GetOwner()))
 	{
 		SpawnedEquipment->EquipmentDefinition = EquipmentDefinition;
 		SpawnedEquipment->FinishSpawning(SpawnLocAndRotation);
@@ -249,17 +270,22 @@ bool UEquipmentComponent::SpawnEquipment(const FEquipmentSlot EquipmentSlot)
 }
 
 // For EquipmentItems
-FEquipmentItem* UEquipmentComponent::GetEquipmentItem(const FEquipmentSlot Slot)
+FEquipmentItem* UEquipmentComponent::GetEquipmentItem(FEquipmentSlot& Slot)
 {
-	return EquipmentItems.FindByKey(Slot);
+	FEquipmentItem* EquipmentItem = EquipmentItems.FindByKey(Slot);
+	if(EquipmentItem)
+	{
+		Slot = EquipmentItem->EquipmentSlot;
+	}
+	return EquipmentItem;
 }
 
-UEquipmentDefinition* UEquipmentComponent::GetEquipmentDefinition(const FEquipmentSlot Slot)
+UEquipmentDefinition* UEquipmentComponent::GetEquipmentDefinition(FEquipmentSlot Slot)
 {
 	if(GetEquipmentItem(Slot)){ return GetEquipmentItem(Slot)->EquipmentDefinition; } return nullptr;
 }
 
-AActor* UEquipmentComponent::GetEquipment(const FEquipmentSlot Slot)
+AEquipment* UEquipmentComponent::GetEquipment(FEquipmentSlot Slot)
 {
 	if(GetEquipmentItem(Slot)){ return GetEquipmentItem(Slot)->Equipment; } return nullptr;
 }

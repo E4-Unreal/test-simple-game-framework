@@ -4,9 +4,13 @@
 
 
 #include "Equipment.h"
+
+#include "EnhancedInputSubsystems.h"
 #include "ThirdPerson/ThirdPerson.h"
 #include "EquipmentItem.h"
 
+//////////////////////////////////////////////////////////////////////
+// Equipment
 
 // Sets default values
 AEquipment::AEquipment()
@@ -55,3 +59,63 @@ void AEquipment::PostInitializeComponents()
 	ApplyEquipmentDefinition();
 }
 
+//////////////////////////////////////////////////////////////////////
+// Active Equipment
+
+void AActiveEquipment::Bind()
+{
+	// 유효성 검사
+	if(!IsValid(GetOwner())){ UE_LOG(LogEquipment, Warning, TEXT("AActiveEquipment::Bind > %s: Owner is not valid"), *this->GetName()) return; }
+	
+	APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+	if(PlayerController == nullptr){ UE_LOG(LogEquipment, Warning, TEXT("AActiveEquipment::Bind > %s: Check Owner has player controller"), *this->GetName()) return; }
+
+	// 플레이어 컨트롤러에 입력 액션 매핑 컨텍스트 추가
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	{
+		if(MappingContext == nullptr){ UE_LOG(LogEquipment, Warning, TEXT("AActiveEquipment::Bind > %s: MappingContext is nullptr"), *this->GetName()) return; }
+		Subsystem->AddMappingContext(MappingContext, 0);
+	}
+
+	// 플레이어 입력 활성화
+	this->EnableInput(PlayerController);
+}
+
+void AActiveEquipment::Unbind()
+{
+	// 유효성 검사
+	if(!IsValid(GetOwner())){ UE_LOG(LogEquipment, Warning, TEXT("AActiveEquipment::Bind > %s: Owner is not valid"), *this->GetName()) return; }
+	
+	APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+	if(PlayerController == nullptr){ UE_LOG(LogEquipment, Warning, TEXT("AActiveEquipment::Bind > %s: Check Owner has player controller"), *this->GetName()) return; }
+
+	// 플레이어 컨트롤러에 입력 액션 매핑 컨텍스트 제거
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	{
+		if(MappingContext == nullptr){ UE_LOG(LogEquipment, Warning, TEXT("AActiveEquipment::Bind > %s: MappingContext is nullptr"), *this->GetName()) return; }
+		Subsystem->RemoveMappingContext(MappingContext);
+	}
+
+	// 플레이어 입력 활성화
+	this->EnableInput(PlayerController);
+}
+
+void AActiveEquipment::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AActiveEquipment::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void AActiveEquipment::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
+void AActiveEquipment::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+}

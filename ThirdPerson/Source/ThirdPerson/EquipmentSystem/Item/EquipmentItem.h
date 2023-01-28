@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Equipment.h"
 #include "ThirdPerson/EquipmentSystem/Component/EquipmentSlots.h"
 #include "ThirdPerson/Item/ItemDefinition.h"
 #include "EquipmentItem.generated.h"
@@ -34,74 +35,9 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
-// Equipment Slot
-
-USTRUCT(Atomic, BlueprintType, Meta = (DisplayName = "Equipment Item", ShortTooltip = "Struct used for EquipmentComponent"))
-struct FEquipmentSlot
-{
-	GENERATED_USTRUCT_BODY()
-
-protected:
-	// 멤버 변수
-	UPROPERTY(BlueprintReadOnly)
-	FName SlotName;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FGameplayTag> CategoryTags;
-	
-	UPROPERTY(BlueprintReadOnly)
-	int32 Index = 0;
-
-	UPROPERTY(BlueprintReadOnly)
-	FGameplayTag SocketTag;
-
-public:
-	// 멤버 함수
-	FEquipmentSlot(){}
-	FEquipmentSlot(const FMainEquipmentSlot& EquipmentSlot, const int32 Index)
-	{
-		this->SlotName = EquipmentSlot.SlotName;
-		this->CategoryTags = EquipmentSlot.CategoryTags;
-		this->Index = Index;
-		this->SocketTag = EquipmentSlot.SocketTags[Index];
-	}
-
-	FEquipmentSlot(const FSubEquipmentSlot& EquipmentSlot, const int32 Index)
-	{
-		this->SlotName = EquipmentSlot.SlotName;
-		this->CategoryTags = EquipmentSlot.CategoryTags;
-		this->Index = Index;
-		this->SocketTag = EquipmentSlot.SocketTags[Index];
-	}
-
-	FORCEINLINE FName GetSlotName() const { return SlotName; }
-	FORCEINLINE TArray<FGameplayTag> GetCategoryTags() const { return CategoryTags; }
-	FORCEINLINE int32 GetIndex() const { return Index; }
-	FORCEINLINE FGameplayTag GetSocketTag() const { return SocketTag; }
-
-	FORCEINLINE bool operator==(const FEquipmentSlot Other) const { return this->SlotName == Other.SlotName && this->Index == Other.Index; }
-	FORCEINLINE bool operator!=(const FEquipmentSlot Other) const { return !(this->SlotName == Other.SlotName && this->Index == Other.Index); }
-	
-	//////////////////////////////////////////////////////////////////////
-	
-	FORCEINLINE FString GetName() const { return SlotName.ToString() + FString("[") + FString::FromInt(Index) + FString("]"); }
-	FORCEINLINE bool IsMain(const FName MainTag) const { return SlotName == MainTag; }
-	FORCEINLINE bool Matches(FEquipmentSlot Other) const { return this->SlotName == Other.GetSlotName(); }
-	FORCEINLINE bool Contains(FGameplayTag Other) const
-	{
-		for(FGameplayTag CategoryTag : CategoryTags)
-		{
-			if(Other.MatchesTagExact(CategoryTag))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-};
-
-//////////////////////////////////////////////////////////////////////
 // Equipment Item
+
+class AEquipment;
 
 USTRUCT(Atomic, BlueprintType, Meta = (DisplayName = "Equipment Item", ShortTooltip = "Struct used for EquipmentComponent"))
 struct FEquipmentItem
@@ -112,12 +48,13 @@ public:
 	// 멤버 변수
 	UPROPERTY(BlueprintReadOnly)
 	FEquipmentSlot EquipmentSlot;
-	
+
+	// Todo Change to EquipmentInstance (UEquipmentDefinition, FEquipmentStat)
 	UPROPERTY(BlueprintReadOnly)
 	UEquipmentDefinition* EquipmentDefinition = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly)
-	AActor* Equipment = nullptr;
+	AEquipment* Equipment = nullptr;
 	
 	// 멤버 함수
 	FEquipmentItem() {}
@@ -130,14 +67,24 @@ public:
 	FORCEINLINE bool IsSpawned() const { return Equipment != nullptr; }
 	
 	bool IsAddable(const UEquipmentDefinition* NewEquipment) const;
-	bool Add(UEquipmentDefinition* NewEquipment);
-	bool SetEquipment(AActor* SpawnedActor);
-	void Clear(){ EquipmentDefinition = nullptr; Equipment = nullptr; }
+	bool SetEquipmentDefinition(UEquipmentDefinition* NewEquipment);
+	bool SetEquipment(AEquipment* SpawnedActor);
+	void Clear()
+	{
+		Equipment->Destroy();
+		Equipment = nullptr;
+		EquipmentDefinition = nullptr;
+	}
+
+	// For EquipmentSlot
+	FORCEINLINE bool IsMainSlot() const { return EquipmentSlot.IsMainSlot(); }
+	FORCEINLINE bool IsActiveSlot() const { return EquipmentSlot.IsActiveSlot(); }
+	FORCEINLINE bool IsPassiveSlot() const { return EquipmentSlot.IsPassiveSlot(); }
 
 	//Todo EquipmentComponent에 통합시키는 방법도 있을 것 같다
-	FORCEINLINE AActor* RemoveEquipment()
+	FORCEINLINE AEquipment* RemoveEquipment()
 	{
-		AActor* ActorToDestroy = Equipment;
+		AEquipment* ActorToDestroy = Equipment;
 		Equipment = nullptr;
 		return ActorToDestroy;
 	}
@@ -153,10 +100,7 @@ public:
 	FORCEINLINE bool operator==(FEquipmentSlot Other) const { return this->EquipmentSlot == Other; }
 	FORCEINLINE bool operator!=(FEquipmentSlot Other) const { return this->EquipmentSlot != Other; }
 
-	//FORCEINLINE bool operator==(FName Other) const { return this->EquipmentSlot.GetSlotName() == Other; }
-	//FORCEINLINE bool operator!=(FName Other) const { return this->EquipmentSlot.GetSlotName() != Other; }
-
 	// UEquipmentComponent::CheckEquipSlot(UEquipmentDefinition* NewEquipment)
-	FORCEINLINE bool operator==(UEquipmentDefinition* Other) const { return this->EquipmentSlot.Contains(Other->EquipmentSlotTag); }
-	FORCEINLINE bool operator!=(UEquipmentDefinition* Other) const { return !(this->EquipmentSlot.Contains(Other->EquipmentSlotTag)); }
+	FORCEINLINE bool operator==(UEquipmentDefinition* Other) const { return this->EquipmentSlot.MatchesTag(Other->EquipmentSlotTag); }
+	FORCEINLINE bool operator!=(UEquipmentDefinition* Other) const { return !(this->EquipmentSlot.MatchesTag(Other->EquipmentSlotTag)); }
 };

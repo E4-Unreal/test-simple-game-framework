@@ -24,9 +24,12 @@ void FThirdPersonGameplayTags::InitializeNativeTags()
 void FThirdPersonGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 {
 	ADD_TAG(EquipmentSlot_Active, "EquipmentSlot for Active Equipment");
-	ADD_TAG(EquipmentSlot_Passive, "EquipmentSlot for Passive Equipment");
 	ADD_TAG(EquipmentSlot_Active_Main, "EquipmentSlot for Main Active Equipment");
 	ADD_TAG(EquipmentSlot_Active_Sub, "EquipmentSlot for Sub Active Equipment");
+	ADD_TAG(EquipmentSlot_Passive, "EquipmentSlot for Passive Equipment");
+
+	ADD_TAG(EquipmentSocket, "EquipmentSocket for mapping Socket Name");
+	
 	ADD_TAG(Item, "Item");
 	ADD_TAG(Item_Equipment, "Equipment Item");
 

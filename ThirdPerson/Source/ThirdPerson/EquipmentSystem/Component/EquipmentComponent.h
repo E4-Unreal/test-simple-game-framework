@@ -46,7 +46,6 @@ protected:
 	USubState* SubState;
 
 	// For SelectEquipment()
-	FName MainTag;
 	FEquipmentSlot PrimarySlot;
 
 	// 멤버 함수
@@ -56,33 +55,42 @@ public:
 
 	void Init();
 
-	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent")
-	bool CheckEquipSlot(UEquipmentDefinition* NewEquipment);
+	// For Equipment
+	UFUNCTION(BlueprintPure, Category = "EquipmentComponent|Equipment")
+	FORCEINLINE AEquipment* GetEquipment(FEquipmentSlot Slot);
 	
-	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent")
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent|Equipment")
+	FORCEINLINE AEquipment* GetCurrentEquipment();
+
+	// For EquipmentDefinition
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent|EquipmentDefinition")
+	bool CanEquip(UEquipmentDefinition* NewEquipment);
+	
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent|EquipmentDefinition")
 	bool AddEquipment(UEquipmentDefinition* NewEquipment);
 
-	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent")
+	// For Input
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent|InputAction")
 	bool SelectEquipment(const FEquipmentSlot SelectedSlot);
-
-	// For UI
-	UFUNCTION(BlueprintPure, Category = "EquipmentComponent | UI")
-	TArray<FEquipmentItem> GetEquipmentItems() const { return EquipmentItems; }
 	
-	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent | UI")
-	bool RemoveEquipmentBySlot(FEquipmentSlot EquipmentSlot);
+	// For UI
+	UFUNCTION(BlueprintPure, Category = "EquipmentComponent|UI")
+	FORCEINLINE UEquipmentDefinition* GetEquipmentDefinition(FEquipmentSlot Slot);
+	
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent|UI")
+	UEquipmentDefinition* RemoveEquipmentItem(FEquipmentSlot EquipmentSlot);
 
-	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent | UI")
-	bool SwapEquipmentsBySlot(FEquipmentSlot OriginSlot, FEquipmentSlot DestSlot);
+	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent|UI")
+	bool SwapEquipmentItems(FEquipmentSlot OriginSlot, FEquipmentSlot DestSlot);
 	
 	// 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent | EvenetDispatcher")
+	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent|EvenetDispatchers")
 	FEquipmentDelegate OnEquipmentAdded;
 	
-	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent | EvenetDispatcher")
+	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent|EvenetDispatchers")
 	FEquipmentDelegate OnEquipmentSelected;
 	
-	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent | EvenetDispatcher")
+	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent|EvenetDispatchers")
 	FEquipmentDelegate OnEquipmentSwapped;
 
 protected:
@@ -99,12 +107,10 @@ protected:
 	const FName* CheckSocket(const FEquipmentSlot EquipmentSlot) const;
 
 	// Depend on UEquipmentDefinition
-	bool SpawnEquipment(const FEquipmentSlot EquipmentSlot);
+	bool SpawnEquipment(FEquipmentSlot EquipmentSlot);
 
 	// Depend on FEquipmentItem
-	FORCEINLINE FEquipmentItem* GetEquipmentItem(const FEquipmentSlot Slot);
-	FORCEINLINE UEquipmentDefinition* GetEquipmentDefinition(const FEquipmentSlot Slot);
-	FORCEINLINE AActor* GetEquipment(const FEquipmentSlot Slot);
+	FORCEINLINE FEquipmentItem* GetEquipmentItem(FEquipmentSlot& Slot);
 
 	// Based on GetEquipmentItem(), GetEquipmentDefinition(), GetEquipment()
 	void MoveEquipmentToSlot(const FEquipmentSlot OriginSlot, const FEquipmentSlot DestSlot);

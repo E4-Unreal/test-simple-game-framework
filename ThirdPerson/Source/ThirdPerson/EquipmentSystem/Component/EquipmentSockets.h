@@ -4,7 +4,7 @@
 #include "EquipmentSockets.generated.h"
 
 
-UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment Sockets", ShortTooltip = "Skeletal Mesh Socket Names for Equipment Slots"))
+UCLASS(Blueprintable, BlueprintType, Const, Meta = (DisplayName = "Equipment Sockets", ShortTooltip = "DataAsset for mapping Equipment Socket GameplayTags to Equipment Socket Names"))
 class THIRDPERSON_API UEquipmentSockets : public UDataAsset
 {
 	GENERATED_BODY()
@@ -12,9 +12,6 @@ class THIRDPERSON_API UEquipmentSockets : public UDataAsset
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	USkeletalMesh* SkeletalMeshAsset;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="EquipmentSlot"))
-	TMap<FGameplayTag, FName> SocketMappings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="EquipmentSocket"))
 	TMap<FGameplayTag, FName> RegisteredSockets;
@@ -31,7 +28,6 @@ protected:
 	
 public:
 	FORCEINLINE USkeletalMesh* GetSkeletalMeshAsset() const { return SkeletalMeshAsset; }
-	FORCEINLINE TMap<FGameplayTag, FName> GetSocketMappings() const { return SocketMappings; }
 	FORCEINLINE TMap<FGameplayTag, FName> GetRegisteredSockets() const { return RegisteredSockets; }
 
 protected:

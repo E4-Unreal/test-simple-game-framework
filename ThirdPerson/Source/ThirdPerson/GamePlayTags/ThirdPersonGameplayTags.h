@@ -22,9 +22,12 @@ public:
 	static void InitializeNativeTags();
 
 	FGameplayTag EquipmentSlot_Active;
-	FGameplayTag EquipmentSlot_Passive;
 	FGameplayTag EquipmentSlot_Active_Main;
 	FGameplayTag EquipmentSlot_Active_Sub;
+	FGameplayTag EquipmentSlot_Passive;
+
+	FGameplayTag EquipmentSocket;
+	
 	FGameplayTag Item;
 	FGameplayTag Item_Equipment;
 

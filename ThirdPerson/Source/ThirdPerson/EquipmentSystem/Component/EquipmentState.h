@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "UObject/Object.h"
 #include "EquipmentComponent.h"
 #include "EquipmentState.generated.h"
@@ -37,12 +36,12 @@ public:
 	virtual void SwapToSubEquipment() {}
 	virtual void SwapToSelectedEquipment(FEquipmentSlot Slot);
 	FORCEINLINE FEquipmentSlot GetCurrentSlot() const { return CurrentSlot; }
-	FORCEINLINE void SetCurrentSlot(FEquipmentSlot Slot) { CurrentSlot = Slot; }
+	FORCEINLINE void SetCurrentSlot(FEquipmentSlot Slot);
 
 protected:
 	// EquipmentComponent 멤버 변수 사용 간소화
-	FORCEINLINE FName GetMainTag() const { return EquipmentComponent->MainTag; }
 	FORCEINLINE FEquipmentSlot GetPrimarySlot() const { return EquipmentComponent->PrimarySlot; }
+	// Todo EquipmentState에서 초기화 하는 방법?
 	FORCEINLINE UMainState* GetMainState() const { return EquipmentComponent->GetMainState(); }
 	FORCEINLINE USubState* GetSubState() const { return EquipmentComponent->GetSubState(); }
 

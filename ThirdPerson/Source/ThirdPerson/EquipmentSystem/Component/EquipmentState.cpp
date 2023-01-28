@@ -15,7 +15,7 @@ UEquipmentState::UEquipmentState()
 void UEquipmentState::SwapToSelectedEquipment(FEquipmentSlot Slot)
 {
 	SelectedSlot = Slot;
-	if(SelectedSlot.IsMain(GetMainTag()))
+	if(SelectedSlot.IsMainSlot())
 	{
 		SwapToMainEquipment();
 	}
@@ -23,6 +23,12 @@ void UEquipmentState::SwapToSelectedEquipment(FEquipmentSlot Slot)
 	{
 		SwapToSubEquipment();
 	}
+}
+
+void UEquipmentState::SetCurrentSlot(FEquipmentSlot Slot)
+{
+	CurrentSlot = Slot;
+	UE_LOG(LogEquipment, Log, TEXT("EquipmentState::SetCurrentSlot > %s: CurrentSlot is changed to %s"), *this->GetName(), *Slot.GetName())
 }
 
 void UEquipmentState::ChangeState(UEquipmentState* NewState) const
@@ -51,7 +57,7 @@ void UMainState::SwapToMainEquipment()
 	}
 	
 	// 선택된 장비 슬롯으로 CurrentSlot 변경
-	CurrentSlot = SelectedSlot;
+	SetCurrentSlot(CurrentSlot);
 }
 
 void UMainState::SwapToSubEquipment()
@@ -98,7 +104,7 @@ void USubState::SwapToSubEquipment()
 	// 새로운 서브 장비를 PrimarySlot에 부착
 	EquipmentComponent->MoveEquipmentToSlot(SelectedSlot, GetPrimarySlot());
 
-	CurrentSlot = SelectedSlot;
+	SetCurrentSlot(SelectedSlot);
 }
 
 void USubState::SwapToSelectedEquipment(const FEquipmentSlot Slot)
