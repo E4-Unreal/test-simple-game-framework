@@ -1,8 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
+// Wiki for simpleFramework
+// https://github.com/Eu4ng/simpleFramework/wiki
 
 #include "ItemDefinition.h"
 #include "ThirdPerson/ThirdPerson.h"
+
+//////////////////////////////////////////////////////////////////////
+// Inventory Item
 
 bool FInventoryItem::Add(int32& NewCount)
 {
@@ -22,12 +26,12 @@ bool FInventoryItem::Add(int32& NewCount)
 	}
 	else if(NewCount == 0)
 	{
-		UE_LOG(LogInventory, Warning, TEXT("InventoryItem::Add\nNewCount: 0"));
+		UE_LOG(LogInventory, Warning, TEXT("InventoryItem::Add > NewCount: 0"));
 		return false;
 	}
 	else
 	{
-		UE_LOG(LogInventory, Error, TEXT("InventoryItem::Add\nNewCount < 0"));
+		UE_LOG(LogInventory, Error, TEXT("InventoryItem::Add > NewCount < 0"));
 		return false;
 	}
 }

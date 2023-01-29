@@ -1,4 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Wiki for simpleFramework
+// https://github.com/Eu4ng/simpleFramework/wiki
 
 #pragma once
 
@@ -23,5 +25,5 @@ class THIRDPERSON_API IInteractable
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void Interact(class AActor* Interactor);
+	void Interact(const class AActor* Interactor);
 };
