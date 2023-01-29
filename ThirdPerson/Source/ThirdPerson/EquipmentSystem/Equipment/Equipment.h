@@ -8,8 +8,6 @@
 #include "GameFramework/Actor.h"
 #include "Equipment.generated.h"
 
-//////////////////////////////////////////////////////////////////////
-// Equipment
 UCLASS()
 class THIRDPERSON_API AEquipment : public AActor
 {
@@ -32,39 +30,6 @@ public:
 	// EquipmentDefinition을 읽어들여 스켈레탈 메시 설정
 	void ApplyEquipmentDefinition() const;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// 에디터에서 설정을 변경하는 경우
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-
-	// SpawnActor 혹은 에디터에서 생성하는 경우
-	virtual void PostInitializeComponents() override;
-};
-
-//////////////////////////////////////////////////////////////////////
-// Active Equipment
-UCLASS()
-class THIRDPERSON_API AActiveEquipment : public AEquipment
-{
-	GENERATED_BODY()
-	
-	// 멤버 변수
-public:
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	class UInputMappingContext* MappingContext;
-
-	// 멤버 함수
-public:
-	void Bind();
-	void Unbind();
-	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

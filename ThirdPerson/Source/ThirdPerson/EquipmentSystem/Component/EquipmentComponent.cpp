@@ -8,8 +8,7 @@
 #include "EquipmentSockets.h"
 #include "EquipmentState.h"
 #include "GameFramework/Character.h"
-#include "ThirdPerson/EquipmentSystem/Item/Equipment.h"
-#include "ThirdPerson/EquipmentSystem/Item/EquipmentItem.h"
+#include "ThirdPerson/EquipmentSystem/Equipment/Equipment.h"
 
 // Sets default values for this component's properties
 UEquipmentComponent::UEquipmentComponent()
@@ -107,10 +106,10 @@ bool UEquipmentComponent::AddEquipment(UEquipmentDefinition* NewEquipment)
 			}
 
 			// 이벤트 디스패처 호출
-			if(OnEquipmentAdded.IsBound())
+			if(OnEquipmentUpdate.IsBound())
 			{
 				UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::AddEquipment > Broadcast OnEquipmentAdded"))
-				OnEquipmentAdded.Broadcast();
+				OnEquipmentUpdate.Broadcast();
 			}
 			
 			return true;
@@ -158,6 +157,13 @@ UEquipmentDefinition* UEquipmentComponent::RemoveEquipmentItem(FEquipmentSlot Eq
 {
 	UEquipmentDefinition* EquipmentDefinition = GetEquipmentDefinition(EquipmentSlot);
 	GetEquipmentItem(EquipmentSlot)->Clear();
+
+	// 이벤트 디스패처 호출
+	if(OnEquipmentSelected.IsBound())
+	{
+		UE_LOG(LogEquipment, Log, TEXT("EquipmentComponent::SelectEquipment > Broadcast OnEquipmentSelected"))
+		OnEquipmentSelected.Broadcast();
+	}
 	return EquipmentDefinition;
 }
 
@@ -309,6 +315,7 @@ FEquipmentItem* UEquipmentComponent::GetEquipmentItem(FEquipmentSlot& Slot)
 	FEquipmentItem* EquipmentItem = EquipmentItems.FindByKey(Slot);
 	if(EquipmentItem)
 	{
+		// Slot과 일치하는 EquipmentSlot이 발견되면 Slot을 EquipmentSlot으로 변환
 		Slot = EquipmentItem->EquipmentSlot;
 	}
 	return EquipmentItem;
@@ -316,7 +323,16 @@ FEquipmentItem* UEquipmentComponent::GetEquipmentItem(FEquipmentSlot& Slot)
 
 UEquipmentDefinition* UEquipmentComponent::GetEquipmentDefinition(FEquipmentSlot Slot)
 {
-	if(GetEquipmentItem(Slot)){ return GetEquipmentItem(Slot)->EquipmentDefinition; } return nullptr;
+	if(GetEquipmentItem(Slot))
+	{
+		return GetEquipmentItem(Slot)->EquipmentDefinition;
+	}
+	return nullptr;
+}
+
+UEquipmentDefinition* UEquipmentComponent::GetCurrentEquipmentDefinition(FEquipmentSlot Slot)
+{
+	return GetEquipmentDefinition(EquipmentState->GetCurrentSlot());
 }
 
 AEquipment* UEquipmentComponent::GetEquipment(FEquipmentSlot Slot)

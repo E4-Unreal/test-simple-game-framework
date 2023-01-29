@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "ThirdPerson/EquipmentSystem/Item/EquipmentItem.h"
+#include "ThirdPerson/EquipmentSystem/Equipment/EquipmentItem.h"
 #include "EquipmentComponent.generated.h"
 
 class AEquipment;
@@ -69,14 +69,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent|EquipmentDefinition")
 	bool AddEquipment(UEquipmentDefinition* NewEquipment);
 
+	UFUNCTION(BlueprintPure, Category = "EquipmentComponent|EquipmentDefinition")
+	FORCEINLINE UEquipmentDefinition* GetEquipmentDefinition(FEquipmentSlot Slot);
+
+	UFUNCTION(BlueprintPure, Category = "EquipmentComponent|EquipmentDefinition")
+	FORCEINLINE UEquipmentDefinition* GetCurrentEquipmentDefinition(FEquipmentSlot Slot);
+
 	// For Input
 	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent|InputAction")
-	bool SelectEquipment(const FEquipmentSlot SelectedSlot);
+	bool SelectEquipment(FEquipmentSlot SelectedSlot);
 	
 	// For UI
-	UFUNCTION(BlueprintPure, Category = "EquipmentComponent|UI")
-	FORCEINLINE UEquipmentDefinition* GetEquipmentDefinition(FEquipmentSlot Slot);
-	
 	UFUNCTION(BlueprintCallable, Category = "EquipmentComponent|UI")
 	UEquipmentDefinition* RemoveEquipmentItem(FEquipmentSlot EquipmentSlot);
 
@@ -85,7 +88,7 @@ public:
 	
 	// 이벤트 디스패처
 	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent|EvenetDispatchers")
-	FEquipmentDelegate OnEquipmentAdded;
+	FEquipmentDelegate OnEquipmentUpdate;
 	
 	UPROPERTY(BlueprintAssignable, Category = "EquipmentComponent|EvenetDispatchers")
 	FEquipmentDelegate OnEquipmentSelected;
